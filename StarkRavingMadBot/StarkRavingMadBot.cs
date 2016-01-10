@@ -111,6 +111,7 @@ namespace DiscordBot
         }
 
         private void ServerCommand(object sender, MessageEventArgs e)
+
         {
             if (IsBot(e.User)) return;//Ignores self
             if (!e.Message.Text.StartsWith(PREDICATE)) return;

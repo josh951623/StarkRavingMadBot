@@ -10,11 +10,13 @@ using Discord;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using MarkdownSharp;
+using RedditSharp;
 
 namespace DiscordBot
 {
     partial class StarkRavingMadBot
     {
+        //This code is a PoS, yeah. Ain't it cool.
         private List<EventHandler<MessageEventArgs>> GetCommands()
         {
             return new List<EventHandler<MessageEventArgs>>()
@@ -39,6 +41,7 @@ namespace DiscordBot
 #if DEBUG
                 //Beta Features
                 //new EventHandler<MessageEventArgs>(Wiki),//No, not even beta
+                new EventHandler<MessageEventArgs>(Reddit),//Out until XML configs are up and running
 #else
                 //Release-Only Features
                 new EventHandler<MessageEventArgs>(Invite),
@@ -303,6 +306,51 @@ namespace DiscordBot
             }
 
             await Client.SendMessage(e.Channel, $"Result is: {val}");
+        }
+
+        private async void Reddit(object s, MessageEventArgs e)
+        {
+            const int NUM_POSTS = 25;
+
+            var sub = (new Reddit()).GetSubreddit(GetAfterCommand(e.Message.Text).Split()[0]);
+
+            if (sub == null)
+            {
+                await Client.SendMessage(e.Channel, "Subreddit does not exist.");
+                return;
+            }
+
+            var posts = sub.Hot.Take(NUM_POSTS).ToList();//Red ones go fasta, and so do smaller data sets and things that don't require http requests.
+
+            var sw = System.Diagnostics.Stopwatch.StartNew();
+            if (!posts.Any())
+            {
+                await Client.SendMessage(e.Channel, "Subreddit has no posts.");
+                return;
+            }
+            Console.WriteLine($"sub-any took {sw.ElapsedMilliseconds}ms");
+            sw.Restart();
+
+            if (posts.All(x=>x.NSFW))//Safe to assume NSFW if 25 newest are NSFW. Not sure if reddit automatically marks posts NSFW in NSFW subs, so this could cause issues later....
+            {
+                await Client.SendMessage(e.Channel, "NSFW is not currently allowed");
+                return;
+            }
+
+
+            Console.WriteLine($"sub-nsfw took {sw.ElapsedMilliseconds}ms");
+            sw.Restart();
+
+
+            var post = posts.Where(x=>!x.NSFW).ElementAt(Rand.Next(NUM_POSTS));
+            var msg = $"**{post.Title}**\n--\n{(post.IsSelfPost ? post.SelfText : post.Url.ToString())}";
+            if (msg.Length > 2000) msg.Remove(1999);
+            await Client.SendMessage(e.Channel, msg);
+
+            Console.WriteLine($"sub-msg took {sw.ElapsedMilliseconds}ms");
+            sw.Restart();
+
+            //Random hello to random person on github/b7de
         }
 
         #endregion
