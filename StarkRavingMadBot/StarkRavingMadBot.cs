@@ -7,82 +7,126 @@ using Discord;
 
 namespace DiscordBot
 {
+    
+
     partial class StarkRavingMadBot
     {
-        private const long USER_JOSH_ID = 93398876408524800;
-        private const long USER_SPREADLINK_ID = 118798518138830853;
+        private const long USER_JOSH_ID         = 93398876408524800;
+        private const long USER_SPREADLINK_ID   = 118798518138830853;
+        private const long USER_STARK_ID        = 121281613660160000;
+        private const long USER_BETASTARK_ID    = 134799811147726848;
+
+        private const long MBTI_SERVER_ID       = 133691613334470656;
         /****************BOT SETTINGS***************/
+#if DEBUG
+        private const string PREDICATE = "deb$";
+#else  
         private const string PREDICATE = "$";
+#endif
         private const string VERSION = "0.0.2";
         /******************************************/
 
-        private List<long> ListeningServers = new List<long>();
         public Random Rand = new Random();
         private DiscordClient Client = new DiscordClient();
-
         private ManualResetEvent Handler = new ManualResetEvent(false);
-        public event EventHandler<MessageEventArgs> MessageOnSever;
+
+        private string Email { get; set; }
+        private string Password { get; set; }
 
         public StarkRavingMadBot(string email, string pass)
         {
-            //Display all log messages in the console
-            Client.LogMessage += (s, e) => Console.WriteLine($"[{e.Severity}] {e.Source}: {e.Message}");
+            this.Email = email;
+            this.Password = pass;
 
-            Client.Connect(email, pass).Wait();
-            Client.EditProfile(pass, "StarkRavingMadBot", email);
-            
-            //Add Main handler (just filters messages to ones sent on the server
-            Client.MessageReceived += new EventHandler<MessageEventArgs>(CheckIfOnServer);
+            AttemptConnect();
 
             //Add Handlers
-            this.MessageOnSever += new EventHandler<MessageEventArgs>(Mentioned);
-            this.MessageOnSever += new EventHandler<MessageEventArgs>(ServerCommand);
+            //Client.LogMessage += (s, e) => Console.WriteLine($"[{e.Severity}] {e.Source}: {e.Message}");
+            
+            Client.MessageReceived += new EventHandler<MessageEventArgs>(Mentioned);
+            Client.MessageReceived += new EventHandler<MessageEventArgs>(ServerCommand);
 
+            Client.Disconnected += (s, e) =>
+            {
+                Console.WriteLine("Bot was disconnected.");
+                AttemptConnect();
+            };
 
+            Client.UserJoined += (s, e) => SendBotMessage(e.Server, $"'{e.User.Name}' joined the server");
+            Client.UserLeft   += (s, e) => SendBotMessage(e.Server, $"'{e.User.Name}' left the server");
+
+        }
+
+        private async void AttemptConnect(object sender = null, DisconnectedEventArgs e = null)
+        {
+            Console.Write("Connecting...");
+            while (Client.State != DiscordClientState.Connected)
+            {
+                if(Client.State == DiscordClientState.Connecting)
+                {
+                    Thread.Sleep(1000);
+                    Console.Write(".");
+                    continue;
+                }
+
+                Thread.Sleep(1000);
+
+                await Client.Connect(this.Email, this.Password);
+            }
+            Console.WriteLine("\nConnected");
+        }
+
+        public async void SendBotMessage(Server s, string msg)
+        {
+            var c = s.Channels.Where(x => x.Name.ToLower() == "bot-messages").SingleOrDefault();
+            if (c != null) await Client.SendMessage(c, msg);
         }
 
         public void Start()
         {
             Handler.WaitOne();
         }
-
-        public void AddServer(long serverId)
+        
+        private bool IsBot(long id)
         {
-            ListeningServers.Add(serverId);
+            var list = new List<long>()
+            {
+                Client.CurrentUserId,
+                USER_BETASTARK_ID,
+                USER_STARK_ID
+            };
+
+            return list.Contains(id);
+        }
+
+        private bool IsBot(User u)
+        {
+            return IsBot(u.Id);
         }
 
         /********************Handlers*************************/
-        private void CheckIfOnServer(object s, MessageEventArgs e)
+        private string GetAfterCommand(string str)
         {
-            if (ListeningServers.Contains(e.Server.Id))
-            {
-                //Troll responses
-                //JangoIsTalkingAboutHitlerAgain(s,e);
-                //DincfusVeryOwnTimeVoid(s, e).Wait();
-                OnlyOnes(s, e);
-
-                FitePost(s, e);
-
-                MessageOnSever(s, e);
-            }
+            return str.Remove(0, str.Split()[0].Length).Trim();
         }
 
         private void ServerCommand(object sender, MessageEventArgs e)
         {
-            if (e.User.Id == Client.CurrentUserId) return;//Ignores self
+            if (IsBot(e.User)) return;//Ignores self
+            if (!e.Message.Text.StartsWith(PREDICATE)) return;
+
+            Flair(sender, e);
 
             var rt = e.Message.RawText;
-            if (rt.Contains('$'))
+            if (rt.StartsWith(PREDICATE))
             {
-                rt = rt.Substring(rt.IndexOf('$'));
-                foreach (var c in GetCommands())
+                rt = rt.Remove(0, PREDICATE.Length);
+                rt = rt.Split()[0].ToLower();
+                GetCommands().Where(x => x.Method.Name.ToLower() == rt).FirstOrDefault().Invoke(sender, e);
+
+                if(rt.StartsWith("starkravingmad") || rt.StartsWith("tarkravingmad"))
                 {
-                    var q = e.Message.Text.Split()[0];
-                    if (c.Method.Name.ToLower() == rt.Split()[0].ToLower().Substring(1))
-                    {
-                        c.Invoke(sender, e);
-                        return;
-                    }
+                    HesStarkRavingMad(sender, e);
                 }
             }
         }
@@ -99,13 +143,13 @@ namespace DiscordBot
         {
             if (e.User.Id == USER_JOSH_ID)
             {
-                if (e.Message.RawText.ToLower().Contains("good bot"))
+                if (e.Message.RawText.ToLower().Contains("good"))
                 {
-                    Client.SendMessage(e.Channel, "☜(⌒▽⌒)☞ Senpai master noticed me.").Wait();
+                    Client.SendMessage(e.Channel, "☜(⌒▽⌒)☞ Senpai master noticed me.");
                 }
-                if (e.Message.RawText.ToLower().Contains("bad bot"))
+                if (e.Message.RawText.ToLower().Contains("bad"))
                 {
-                    Client.SendMessage(e.Channel, "ಥ_ಥ But Senpai, why?").Wait();
+                    Client.SendMessage(e.Channel, "ಥ_ಥ But Senpai, why?");
                 }
             }
         }
@@ -116,6 +160,11 @@ namespace DiscordBot
             {
                 Client.SendMessage(Client.GetChannel(125836510971822080), $"**<@{e.User.Id}> Posted.**");
             }
+        }
+
+        private bool UserInRole(User u, Server s, string r)
+        {
+            return u.HasRole(s.Roles.First(x=>x.Name.ToLower() == r.ToLower()));
         }
     }
 }
