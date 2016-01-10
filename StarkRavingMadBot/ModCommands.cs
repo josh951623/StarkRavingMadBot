@@ -29,11 +29,8 @@ namespace DiscordBot
             var reg = new Regex("[ie][ns][tf][jp]");
             if (reg.IsMatch(type))
             {
-                var r = new List<Role>();
-                e.User.Roles.ToList().ForEach(x => {
-                    if (!reg.IsMatch(x.Name.ToLower())) r.Add(x);
-                });
 
+                var r = e.User.Roles.Where(x => !reg.IsMatch(x.Name.ToLower()) && type != "xxxx").ToList();
                 r.Add(e.Server.Roles.Where(x => x.Name.ToLower() == type).Single());
 
                 Client.EditUser(e.User, null, null, r);
