@@ -64,7 +64,7 @@ namespace DiscordBot
             {
                 if(Client.State == DiscordClientState.Connecting)
                 {
-                    Thread.Sleep(1000);
+                    Thread.Sleep(500);
                     Console.Write(".");
                     continue;
                 }

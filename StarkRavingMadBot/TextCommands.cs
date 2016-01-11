@@ -38,6 +38,8 @@ namespace DiscordBot
                 new EventHandler<MessageEventArgs>(Ubreddit),
                 new EventHandler<MessageEventArgs>(Avatar),
                 new EventHandler<MessageEventArgs>(WhoIs),
+                new EventHandler<MessageEventArgs>(Rip),
+                new EventHandler<MessageEventArgs>(Choose),
 #if DEBUG
                 //Beta Features
                 //new EventHandler<MessageEventArgs>(Wiki),//No, not even beta
@@ -50,6 +52,12 @@ namespace DiscordBot
         }
 
         #region Simple Text Commands
+
+        private async void Choose(object s, MessageEventArgs e)
+        {
+            var c = GetAfterCommand(e.Message.Text).Split(';');
+            await Client.SendMessage(e.Channel, c[Rand.Next(c.Length)]); 
+        }
 
         private async void Flip(object s, MessageEventArgs e)
         {
@@ -127,6 +135,11 @@ namespace DiscordBot
             {
                 await Client.SendMessage(e.Channel, $"{msg}.");
             }
+        }
+
+        private async void Rip(object s, MessageEventArgs e)
+        {
+            await Client.SendMessage(e.Channel, $"Funeral service will be held on {DateTime.Today.AddDays(Rand.Next(14)).ToLongDateString()}");
         }
 
         #endregion
