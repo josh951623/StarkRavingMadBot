@@ -1,2 +1,2 @@
 #!/bin/sh
-xbuild /p:Configuration=Release MySolution.sln
+xbuild /p:Configuration=Release
