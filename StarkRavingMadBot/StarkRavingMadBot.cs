@@ -11,12 +11,7 @@ namespace DiscordBot
 
     partial class StarkRavingMadBot
     {
-        private const long USER_JOSH_ID         = 93398876408524800;
-        private const long USER_SPREADLINK_ID   = 118798518138830853;
-        private const long USER_STARK_ID        = 121281613660160000;
-        private const long USER_BETASTARK_ID    = 134799811147726848;
-
-        private const long MBTI_SERVER_ID       = 133691613334470656;
+        private const long USER_JOSH_ID         = 93398876408524800;//Me!
         /****************BOT SETTINGS***************/
 #if DEBUG
         private const string PREDICATE = "b$";
@@ -86,9 +81,10 @@ namespace DiscordBot
         {
             var list = new List<long>()
             {
-                Client.CurrentUserId,
-                USER_BETASTARK_ID,
-                USER_STARK_ID
+                133695051099406336,//Typey
+                Client.CurrentUserId,//Self just in case
+                121281613660160000,//Stark
+                134799811147726848,//Beta Stark
             };
 
             return list.Contains(id);
@@ -106,7 +102,6 @@ namespace DiscordBot
         }
 
         private void ServerCommand(object sender, MessageEventArgs e)
-
         {
             if (IsBot(e.User)) return;//Ignores self
             if (!e.Message.Text.StartsWith(PREDICATE)) return;
