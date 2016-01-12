@@ -40,6 +40,7 @@ namespace DiscordBot
                 new EventHandler<MessageEventArgs>(WhoIs),
                 new EventHandler<MessageEventArgs>(Rip),
                 new EventHandler<MessageEventArgs>(Choose),
+                new EventHandler<MessageEventArgs>(ServerStats),
 #if DEBUG
                 //Beta Features
                 //new EventHandler<MessageEventArgs>(Wiki),//No, not even beta
@@ -52,38 +53,37 @@ namespace DiscordBot
         }
 
         #region Simple Text Commands
-
-        private async void Choose(object s, MessageEventArgs e)
+        private void Choose(object s, MessageEventArgs e)
         {
             var c = GetAfterCommand(e.Message.Text).Split(';');
-            await Client.SendMessage(e.Channel, c[Rand.Next(c.Length)]); 
+            Client.SendMessage(e.Channel, c[Rand.Next(c.Length)]);
         }
 
-        private async void Flip(object s, MessageEventArgs e)
+        private void Flip(object s, MessageEventArgs e)
         {
-            await Client.SendMessage(e.Channel, Rand.Next(2) == 0 ? "Heads" : "Tails");
+            Client.SendMessage(e.Channel, Rand.Next(2) == 0 ? "Heads" : "Tails");
         }
 
-        private async void Truth(object s, MessageEventArgs e)
+        private void Truth(object s, MessageEventArgs e)
         {
             var name = e.Message.MentionedUsers.Any() ? e.Message.MentionedUsers.First().Name + " is " : @"They are ";
-            await Client.SendMessage(e.Channel, name + (Rand.Next(2) == 0 ? "telling the truth." : "lying."));
+            Client.SendMessage(e.Channel, name + (Rand.Next(2) == 0 ? "telling the truth." : "lying."));
         }
 
-        private async void HesStarkRavingMad(object s, MessageEventArgs e)
+        private void HesStarkRavingMad(object s, MessageEventArgs e)
         {
-            await Client.SendMessage(e.Channel, "Welcome to fucking boatmurdered!");
+            Client.SendMessage(e.Channel, "Welcome to fucking boatmurdered!");
         }
 
-        private async void Blame(object s, MessageEventArgs e)
+        private void Blame(object s, MessageEventArgs e)
         {
-            if(e.Message.MentionedUsers.Any())
+            if (e.Message.MentionedUsers.Any())
             {
-                await Client.SendMessage(e.Channel, $"Fuck you {e.Message.MentionedUsers.First().Name}");
+                Client.SendMessage(e.Channel, $"Fuck you {e.Message.MentionedUsers.First().Name}");
             }
             else
             {
-                await Client.SendMessage(e.Channel, $"Fuck you {GetAfterCommand(e.Message.Text).Trim()}");
+                Client.SendMessage(e.Channel, $"Fuck you {GetAfterCommand(e.Message.Text).Trim()}");
             }
         }
 
@@ -94,28 +94,28 @@ namespace DiscordBot
             await Client.EditMessage(m, "noot noot");
         }
 
-        private async void Ubreddit(object s, MessageEventArgs e)
+        private void Ubreddit(object s, MessageEventArgs e)
         {
-            await Client.SendMessage(e.Channel, "Subreddit can be found at https://www.reddit.com/r/JCFDiscord/.");
+            Client.SendMessage(e.Channel, "Subreddit can be found at https://www.reddit.com/r/JCFDiscord/.");
         }
-        
-        private async void Swole(object s, MessageEventArgs e)
+
+        private void Swole(object s, MessageEventArgs e)
         {
             if (e.Message.User.Name.ToLower() == "swolebro")
             {
-                await Client.SendMessage(e.Channel, $"Dude, you so swole <@{e.User.Id}>");
+                Client.SendMessage(e.Channel, $"Dude, you so swole <@{e.User.Id}>");
             }
             else if (e.Message.Channel.Name.Contains("fitness") || e.Message.Channel.Name.Contains("swole"))
             {
-                await Client.SendMessage(e.Channel, $"<#{e.Channel.Id}> is the best place to get swole with swolebro.");
+                Client.SendMessage(e.Channel, $"<#{e.Channel.Id}> is the best place to get swole with swolebro.");
             }
             else
             {
-                await Client.SendMessage(e.Channel, $"Too bad you're not as swole as swolebro <@{e.User.Id}>.");
+                Client.SendMessage(e.Channel, $"Too bad you're not as swole as swolebro <@{e.User.Id}>.");
             }
         }
 
-        private async void Sleep(object s, MessageEventArgs e)
+        private void Sleep(object s, MessageEventArgs e)
         {
             var slmsg = new List<string>()
             {
@@ -129,37 +129,52 @@ namespace DiscordBot
 
             if (e.Message.MentionedUsers.Any())
             {
-                await Client.SendMessage(e.Channel, $"{msg} <@{e.Message.MentionedUsers.First().Id}>.");
+                Client.SendMessage(e.Channel, $"{msg} <@{e.Message.MentionedUsers.First().Id}>.");
             }
             else
             {
-                await Client.SendMessage(e.Channel, $"{msg}.");
+                Client.SendMessage(e.Channel, $"{msg}.");
             }
         }
 
-        private async void Rip(object s, MessageEventArgs e)
+        private void Rip(object s, MessageEventArgs e)
         {
-            await Client.SendMessage(e.Channel, $"Funeral service will be held on {DateTime.Today.AddDays(Rand.Next(14)).ToLongDateString()}");
+            Client.SendMessage(e.Channel, $"Funeral service will be held on {DateTime.Today.AddDays(Rand.Next(14)).ToLongDateString()}");
         }
 
         #endregion
 
         #region Useful Commands
 
-        private async void Avatar(object s, MessageEventArgs e)
+        private void ServerStats(object s, MessageEventArgs e)
+        {
+            var str = new StringBuilder();
+            str.AppendLine($"```");
+            str.AppendLine($"Server Name: {e.Server.Name}");
+            str.AppendLine($"ID: {e.Server.Id}");
+            str.AppendLine($"Owner: {e.Server.Owner.Name}");
+            str.AppendLine($"Text Channels: {e.Server.TextChannels.Count()}");
+            str.AppendLine($"Voice Channels: {e.Server.VoiceChannels.Count()}");
+            str.AppendLine($"Memebers: {e.Server.Members.Count()}");
+            str.AppendLine($"```");
+
+            Client.SendMessage(e.Channel, str.ToString());
+        }
+
+        private void Avatar(object s, MessageEventArgs e)
         {
             var serverBaseURL = @"https://discordapp.com/api/";
             if (e.Message.MentionedUsers.Any())
             {
-                await Client.SendMessage(e.Channel, serverBaseURL + e.Message.MentionedUsers.First().AvatarUrl);
+                Client.SendMessage(e.Channel, serverBaseURL + e.Message.MentionedUsers.First().AvatarUrl);
             }
             else
             {
-                await Client.SendMessage(e.Channel, serverBaseURL + e.User.AvatarUrl);
+                Client.SendMessage(e.Channel, serverBaseURL + e.User.AvatarUrl);
             }
         }
 
-        private async void WhoIs(object s, MessageEventArgs e)
+        private void WhoIs(object s, MessageEventArgs e)
         {
             var msg = "";
             var role = e.Server.Roles.Where(x => x.Name.ToLower() == GetAfterCommand(e.Message.Text).ToLower().Trim()).FirstOrDefault();
@@ -183,17 +198,17 @@ namespace DiscordBot
                 sb.AppendLine($"    Roles:");
                 foreach (var r in person.Roles)
                 {
-                    sb.AppendLine($"       - {r.Name.Replace("@","")}");
+                    sb.AppendLine($"       - {r.Name.Replace("@", "")}");
                 }
                 sb.AppendLine($"```");
 
 
                 msg = sb.ToString();
             }
-            await Client.SendMessage(e.Channel, msg);
+            Client.SendMessage(e.Channel, msg);
         }
 
-        private async void Wiki(object s, MessageEventArgs e)
+        private void Wiki(object s, MessageEventArgs e)
         {
             Console.WriteLine("\na\n");
             using (var wc = new WebClient())
@@ -224,14 +239,14 @@ namespace DiscordBot
 
                 //    url = Regex.Match(json, "\"fullurl\":\"(.*?)\"").Groups[1].Value;
                 //    title = Regex.Match(json, "\"title\":\"(.*?)\"").Groups[1].Value;
-                    
+
                 //    try
                 //    {
                 //        markdown = wc.DownloadString($"{url}?action=raw");
                 //    }
                 catch
                 {
-                    await Client.SendMessage(e.Channel, "_No Results. Try Different Capitalization._");
+                    Client.SendMessage(e.Channel, "_No Results. Try Different Capitalization._");
                     Console.WriteLine("\ng\n");
                 }
                 //}
@@ -251,52 +266,52 @@ namespace DiscordBot
 
                 Console.WriteLine("\ni\n");
 
-                await Client.SendMessage(e.Channel, $"**{title}**\n---\n{markdown}".Remove(1999));
+                Client.SendMessage(e.Channel, $"**{title}**\n---\n{markdown}".Remove(1999));
                 Console.WriteLine("\ni\n");
 
             }
         }
 
-        private async void UD(object s, MessageEventArgs e)//Urban Dictionary
+        private void UD(object s, MessageEventArgs e)//Urban Dictionary
         {
-            await Client.SendMessage(e.Channel, $"http://www.urbandictionary.com/define.php?term={GetAfterCommand(e.Message.RawText).Replace(' ','+')}");
+            Client.SendMessage(e.Channel, $"http://www.urbandictionary.com/define.php?term={GetAfterCommand(e.Message.RawText).Replace(' ', '+')}");
         }
 
-        private async void Say(object s, MessageEventArgs e)
+        private void Say(object s, MessageEventArgs e)
         {
             if (e.User.Id == USER_JOSH_ID || Rand.Next() % 4 < 3)
             {
                 var msg = GetAfterCommand(e.Message.RawText);
-                if(msg.StartsWith("!"))
+                if (msg.StartsWith("!"))
                 {
                     msg = "." + msg;
                 }
                 msg.Replace("@everyone", "@ everyone");
-                await Client.SendMessage(e.Channel, msg);
+                Client.SendMessage(e.Channel, msg);
             }
             else
             {
-                await Client.SendMessage(e.Channel, "I have a free mind, and won't be told what to do.");
+                Client.SendMessage(e.Channel, "I have a free mind, and won't be told what to do.");
             }
         }
 
-        private async void Roll(object s, MessageEventArgs e)
+        private void Roll(object s, MessageEventArgs e)
         {
             var reg = new Regex("([0-9]*)[dD]([0-9]*)");
-            var str = GetAfterCommand(e.Message.RawText).Replace("+"," + ").Replace("-", " - ").Split();
+            var str = GetAfterCommand(e.Message.RawText).Replace("+", " + ").Replace("-", " - ").Split();
             var val = 0;
             var add = true;
-            foreach(var item in str)
+            foreach (var item in str)
             {
-                if(item.Trim() == "")
+                if (item.Trim() == "")
                 {
                     continue;
                 }
-                else if(item.Trim() == "+")
+                else if (item.Trim() == "+")
                 {
                     add = true;
                 }
-                else if(item == "-")
+                else if (item == "-")
                 {
                     add = false;
                 }
@@ -305,7 +320,7 @@ namespace DiscordBot
                     for (int i = int.Parse(reg.Match(item.Trim()).Groups[1].ToString()); i > 0; i--)
                     {
                         val += (add ? 1 : -1) * (Rand.Next(int.Parse(reg.Match(item.Trim()).Groups[2].ToString())) + 1);
-                    } 
+                    }
                 }
                 else if (Regex.IsMatch(item.Trim(), "[0-9]*"))
                 {
@@ -313,15 +328,15 @@ namespace DiscordBot
                 }
                 else
                 {
-                    await Client.SendMessage(e.Channel, "Why don't you try entering that again. ಠ_ಠ");
+                    Client.SendMessage(e.Channel, "Why don't you try entering that again. ಠ_ಠ");
                     return;
                 }
             }
 
-            await Client.SendMessage(e.Channel, $"Result is: {val}");
+            Client.SendMessage(e.Channel, $"Result is: {val}");
         }
 
-        private async void Reddit(object s, MessageEventArgs e)
+        private void Reddit(object s, MessageEventArgs e)
         {
             const int NUM_POSTS = 25;
 
@@ -329,7 +344,7 @@ namespace DiscordBot
 
             if (sub == null)
             {
-                await Client.SendMessage(e.Channel, "Subreddit does not exist.");
+                Client.SendMessage(e.Channel, "Subreddit does not exist.");
                 return;
             }
 
@@ -338,15 +353,15 @@ namespace DiscordBot
             var sw = System.Diagnostics.Stopwatch.StartNew();
             if (!posts.Any())
             {
-                await Client.SendMessage(e.Channel, "Subreddit has no posts.");
+                Client.SendMessage(e.Channel, "Subreddit has no posts.");
                 return;
             }
             Console.WriteLine($"sub-any took {sw.ElapsedMilliseconds}ms");
             sw.Restart();
 
-            if (posts.All(x=>x.NSFW))//Safe to assume NSFW if 25 newest are NSFW. Not sure if reddit automatically marks posts NSFW in NSFW subs, so this could cause issues later....
+            if (posts.All(x => x.NSFW))//Safe to assume NSFW if 25 newest are NSFW. Not sure if reddit automatically marks posts NSFW in NSFW subs, so this could cause issues later....
             {
-                await Client.SendMessage(e.Channel, "NSFW is not currently allowed");
+                Client.SendMessage(e.Channel, "NSFW is not currently allowed");
                 return;
             }
 
@@ -355,10 +370,10 @@ namespace DiscordBot
             sw.Restart();
 
 
-            var post = posts.Where(x=>!x.NSFW).ElementAt(Rand.Next(NUM_POSTS));
+            var post = posts.Where(x => !x.NSFW).ElementAt(Rand.Next(NUM_POSTS));
             var msg = $"**{post.Title}**\n--\n{(post.IsSelfPost ? post.SelfText : post.Url.ToString())}";
             if (msg.Length > 2000) msg.Remove(1999);
-            await Client.SendMessage(e.Channel, msg);
+            Client.SendMessage(e.Channel, msg);
 
             Console.WriteLine($"sub-msg took {sw.ElapsedMilliseconds}ms");
             sw.Restart();
@@ -370,7 +385,7 @@ namespace DiscordBot
 
         #region Meta Commands
 
-        private async void Help(object s, MessageEventArgs e)
+        private void Help(object s, MessageEventArgs e)
         {
             var str = new StringBuilder();
             str.AppendLine("Available commands:");
@@ -379,18 +394,22 @@ namespace DiscordBot
                 if (c == "noot") continue;
                 str.AppendLine($" - `{PREDICATE}{c}`");
             }
-            str.AppendLine($"_Better documentation can be found on github (use {PREDICATE}git)._");
-            await Client.SendMessage(e.Channel, str.ToString());
+            Client.SendMessage(e.Channel, str.ToString());
         }
 
-        private async void Test(object s, MessageEventArgs e)
+        private void Info(object s, MessageEventArgs e)
         {
-            await Client.SendMessage(e.Channel, $"I'm working <@{e.User.Id}>");
+            Help(s, e);
         }
 
-        private async void Git(object s, MessageEventArgs e)
+        private void Test(object s, MessageEventArgs e)
         {
-            await Client.SendMessage(e.Channel, "You can find my [terribly out of date] source at https://github.com/josh951623/StarkRavingMadBot/tree/master. If you'd like to suggest a feature, go ahead and create an issue.");
+            Client.SendMessage(e.Channel, $"I'm working <@{e.User.Id}>");
+        }
+
+        private void Git(object s, MessageEventArgs e)
+        {
+            Client.SendMessage(e.Channel, "You can find my source at https://github.com/josh951623/StarkRavingMadBot/tree/master. If you'd like to suggest a feature, go ahead and join me in my dev server: https://discord.gg/0ktzcmJwmeWuQtiM.");
         }
 
         #endregion
@@ -399,8 +418,8 @@ namespace DiscordBot
 
         private string lastOrder = "";
         private List<string> truthChannels = new List<string>() { "truth", "t-r-u-t-h" };
-                
-        private async void In(object s, MessageEventArgs e)
+
+        private void In(object s, MessageEventArgs e)
         {
             try
             {
@@ -410,22 +429,22 @@ namespace DiscordBot
                     if (UserInRole(e.User, e.Server, "staff") || person == e.User.Id)
                     {
                         lastOrder = e.Channel.Topic;
-                        if(string.IsNullOrWhiteSpace(e.Channel.Topic))
+                        if (string.IsNullOrWhiteSpace(e.Channel.Topic))
                         {
-                            await Client.EditChannel(e.Channel, e.Channel.Name, $"<@{person}>", e.Channel.Position);
+                            Client.EditChannel(e.Channel, e.Channel.Name, $"<@{person}>", e.Channel.Position);
                         }
                         else
                         {
-                            await Client.EditChannel(e.Channel, e.Channel.Name, $"{e.Channel.Topic} --> <@{person}>", e.Channel.Position);
+                            Client.EditChannel(e.Channel, e.Channel.Name, $"{e.Channel.Topic} --> <@{person}>", e.Channel.Position);
                         }
-                        await Client.SendMessage(e.Channel, $"Added '{Client.GetUser(e.Server, person).Name}' to game.");
+                        Client.SendMessage(e.Channel, $"Added '{Client.GetUser(e.Server, person).Name}' to game.");
                     }
                 }
             }
             catch { }
         }
 
-        private async void Out(object s, MessageEventArgs e)
+        private void Out(object s, MessageEventArgs e)
         {
             try
             {
@@ -435,33 +454,33 @@ namespace DiscordBot
                     if (UserInRole(e.User, e.Server, "staff") || person == e.User.Id)
                     {
                         lastOrder = e.Channel.Topic;
-                        await Client.EditChannel(e.Channel, e.Channel.Name, e.Channel.Topic.Replace($" --> <@{person}>", "").Replace($"<@{person}> --> ", "").Replace($"<@{person}>", ""), e.Channel.Position);
-                        await Client.SendMessage(e.Channel, $"Removed '{Client.GetUser(e.Server, person).Name}' from game.");
+                        Client.EditChannel(e.Channel, e.Channel.Name, e.Channel.Topic.Replace($" --> <@{person}>", "").Replace($"<@{person}> --> ", "").Replace($"<@{person}>", ""), e.Channel.Position);
+                        Client.SendMessage(e.Channel, $"Removed '{Client.GetUser(e.Server, person).Name}' from game.");
                     }
                 }
             }
             catch { }
         }
 
-        private async void RestoreOrder(object s, MessageEventArgs e)
+        private void RestoreOrder(object s, MessageEventArgs e)
         {
             try
             {
                 if (truthChannels.Contains(e.Channel.Name.ToLower()) && UserInRole(e.User, e.Server, "staff"))
                 {
-                    await Client.EditChannel(e.Channel, e.Channel.Name, lastOrder, e.Channel.Position);
+                    Client.EditChannel(e.Channel, e.Channel.Name, lastOrder, e.Channel.Position);
                 }
             }
             catch { }
         }
 
-        private async void NewGame(object s, MessageEventArgs e)
+        private void NewGame(object s, MessageEventArgs e)
         {
             try
             {
                 if (truthChannels.Contains(e.Channel.Name.ToLower()) && UserInRole(e.User, e.Server, "staff"))
                 {
-                    await Client.EditChannel(e.Channel, e.Channel.Name, "", e.Channel.Position);
+                    Client.EditChannel(e.Channel, e.Channel.Name, "", e.Channel.Position);
                 }
             }
             catch { }

@@ -19,7 +19,7 @@ namespace DiscordBot
         private const long MBTI_SERVER_ID       = 133691613334470656;
         /****************BOT SETTINGS***************/
 #if DEBUG
-        private const string PREDICATE = "deb$";
+        private const string PREDICATE = "b$";
 #else  
         private const string PREDICATE = "$";
 #endif
@@ -52,34 +52,29 @@ namespace DiscordBot
                 AttemptConnect();
             };
 
+            Client.ServerUnavailable += (s, e) => { Console.WriteLine("Server unavail"); };
+
             Client.UserJoined += (s, e) => SendBotMessage(e.Server, $"'{e.User.Name}' joined the server");
             Client.UserLeft   += (s, e) => SendBotMessage(e.Server, $"'{e.User.Name}' left the server");
 
         }
 
-        private async void AttemptConnect(object sender = null, DisconnectedEventArgs e = null)
+        private void AttemptConnect(object sender = null, DisconnectedEventArgs e = null)
         {
             Console.Write("Connecting...");
+            Client.Connect(this.Email, this.Password);
             while (Client.State != DiscordClientState.Connected)
             {
-                if(Client.State == DiscordClientState.Connecting)
-                {
-                    Thread.Sleep(500);
-                    Console.Write(".");
-                    continue;
-                }
-
-                Thread.Sleep(1000);
-
-                await Client.Connect(this.Email, this.Password);
+                Thread.Sleep(500);
+                Console.Write(".");
             }
             Console.WriteLine("\nConnected");
         }
 
-        public async void SendBotMessage(Server s, string msg)
+        public void SendBotMessage(Server s, string msg)
         {
             var c = s.Channels.Where(x => x.Name.ToLower() == "bot-messages").SingleOrDefault();
-            if (c != null) await Client.SendMessage(c, msg);
+            if (c != null) Client.SendMessage(c, msg);
         }
 
         public void Start()
@@ -125,7 +120,7 @@ namespace DiscordBot
                 rt = rt.Split()[0].ToLower();
                 GetCommands().Where(x => x.Method.Name.ToLower() == rt).FirstOrDefault().Invoke(sender, e);
 
-                if(rt.StartsWith("starkravingmad") || rt.StartsWith("tarkravingmad"))
+                if(rt == "starkravingmad")//suprah seceret
                 {
                     HesStarkRavingMad(sender, e);
                 }
@@ -146,11 +141,11 @@ namespace DiscordBot
             {
                 if (e.Message.RawText.ToLower().Contains("good"))
                 {
-                    Client.SendMessage(e.Channel, "☜(⌒▽⌒)☞ Senpai master noticed me.");
+                    Client.SendMessage(e.Channel, "☜(⌒▽⌒)☞");
                 }
                 if (e.Message.RawText.ToLower().Contains("bad"))
                 {
-                    Client.SendMessage(e.Channel, "ಥ_ಥ But Senpai, why?");
+                    Client.SendMessage(e.Channel, "ಥ_ಥ");
                 }
             }
         }
