@@ -16,7 +16,8 @@ namespace StarkRavingMadBot
 		{
 			if(e.Channel.Name.ToLower() == "staff")
 			{
-				SendBotMessage (e.Server, $"At {DateTime.UtcNow} UTC, {e.User.Name} reported: \n```{Command.GetParameters (e.Message.RawText)}```");
+				var msg = Command.GetParameters (e.Message.Text);
+				SendBotMessage (e.Server, $"At {DateTime.UtcNow} UTC, {e.User.Name} reported: \n```{msg}```");
 			}
 		}
 
