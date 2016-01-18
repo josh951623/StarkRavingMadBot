@@ -4,21 +4,23 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
 using Discord;
+using System.Diagnostics;
+using System.Xml.Linq;
 
-namespace DiscordBot
+namespace StarkRavingMadBot
 {
-    
-
     partial class StarkRavingMadBot
-    {
-        private const long USER_JOSH_ID         = 93398876408524800;//Me!
+	{
+
+		private const long USER_JOSH_ID = 93398876408524800;//Me!
+
+		#if DEBUG
+		public const string PREDICATE = "b$";
+		#else  
+		public const string PREDICATE = "$";
+		#endif
+
         /****************BOT SETTINGS***************/
-#if DEBUG
-        private const string PREDICATE = "b$";
-#else  
-        private const string PREDICATE = "$";
-#endif
-        private const string VERSION = "0.0.2";
         /******************************************/
 
         public Random Rand = new Random();
@@ -29,31 +31,31 @@ namespace DiscordBot
         private string Password { get; set; }
 
         public StarkRavingMadBot(string email, string pass)
-        {
-            this.Email = email;
-            this.Password = pass;
+		{
+			this.Email = email;
+			this.Password = pass;
 
-            AttemptConnect();
+			AttemptConnect ();
 
-            //Add Handlers
-            //Client.LogMessage += (s, e) => Console.WriteLine($"[{e.Severity}] {e.Source}: {e.Message}");
+			//Add Handlers
+			//Client.LogMessage += (s, e) => Console.WriteLine($"[{e.Severity}] {e.Source}: {e.Message}");
             
-            Client.MessageReceived += new EventHandler<MessageEventArgs>(Mentioned);
-            Client.MessageReceived += new EventHandler<MessageEventArgs>(ServerCommand);
+			Client.MessageReceived += new EventHandler<MessageEventArgs> (Mentioned);
+			Client.MessageReceived += new EventHandler<MessageEventArgs> (ServerCommand);
 
-            Client.Disconnected += (s, e) =>
-            {
-                Console.WriteLine("Bot was disconnected.");
-                AttemptConnect();
-            };
+			Client.Disconnected += (s, e) => {
+				Console.WriteLine ("Bot was disconnected.");
+				AttemptConnect ();
+			};
 
-            Client.ServerUnavailable += (s, e) => { Console.WriteLine("Server unavail"); };
+			Client.ServerUnavailable += (s, e) => {
+				Console.WriteLine ("Server unavail");
+			};
 
+#if !DEBUG
             Client.UserJoined += (s, e) => SendBotMessage(e.Server, $"'{e.User.Name}' joined the server");
-            Client.UserLeft   += (s, e) => SendBotMessage(e.Server, $"'{e.User.Name}' left the server");
-
-        }
-
+#endif
+		}
         private void AttemptConnect(object sender = null, DisconnectedEventArgs e = null)
         {
             Console.Write("Connecting...");
@@ -96,30 +98,19 @@ namespace DiscordBot
         }
 
         /********************Handlers*************************/
-        private string GetAfterCommand(string str)
-        {
-            return str.Remove(0, str.Split()[0].Length).Trim();
-        }
-
         private void ServerCommand(object sender, MessageEventArgs e)
         {
             if (IsBot(e.User)) return;//Ignores self
-            if (!e.Message.Text.StartsWith(PREDICATE)) return;
+            if (!e.Message.Text.StartsWith(PREDICATE)) return;//should start with predicate
 
             Flair(sender, e);
+			var c = GetCommands ();
+			c.Where(x => x.IsCommand(e.Message.Text)).FirstOrDefault().Method.Invoke(sender, e);
 
-            var rt = e.Message.RawText;
-            if (rt.StartsWith(PREDICATE))
-            {
-                rt = rt.Remove(0, PREDICATE.Length);
-                rt = rt.Split()[0].ToLower();
-                GetCommands().Where(x => x.Method.Name.ToLower() == rt).FirstOrDefault().Invoke(sender, e);
-
-                if(rt == "starkravingmad")//suprah seceret
-                {
-                    HesStarkRavingMad(sender, e);
-                }
-            }
+//            if(rt == "starkravingmad")//suprah seceret
+//            {
+//                HesStarkRavingMad(sender, e);
+//            }
         }
 
         private void Mentioned(object sender, MessageEventArgs e)

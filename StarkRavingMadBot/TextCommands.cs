@@ -12,52 +12,53 @@ using Newtonsoft.Json.Linq;
 using MarkdownSharp;
 using RedditSharp;
 
-namespace DiscordBot
+namespace StarkRavingMadBot
 {
     partial class StarkRavingMadBot
     {
-        //This code is a PoS, yeah. Ain't it cool.
-        private List<EventHandler<MessageEventArgs>> GetCommands()
-        {
-            return new List<EventHandler<MessageEventArgs>>()
-            {
-                new EventHandler<MessageEventArgs>(Say),
-                new EventHandler<MessageEventArgs>(Help),
-                new EventHandler<MessageEventArgs>(Git),
-                new EventHandler<MessageEventArgs>(Swole),
-                new EventHandler<MessageEventArgs>(Sleep),
-                new EventHandler<MessageEventArgs>(UD),
-                new EventHandler<MessageEventArgs>(Blame),
-                new EventHandler<MessageEventArgs>(Noot),
-                new EventHandler<MessageEventArgs>(Roll),
-                new EventHandler<MessageEventArgs>(Truth),
-                new EventHandler<MessageEventArgs>(Flip),
-                new EventHandler<MessageEventArgs>(In),
-                new EventHandler<MessageEventArgs>(Out),
-                new EventHandler<MessageEventArgs>(NewGame),
-                new EventHandler<MessageEventArgs>(Ubreddit),
-                new EventHandler<MessageEventArgs>(Avatar),
-                new EventHandler<MessageEventArgs>(WhoIs),
-                new EventHandler<MessageEventArgs>(Rip),
-				new EventHandler<MessageEventArgs>(Choose),
-				new EventHandler<MessageEventArgs>(ServerStats),
-				new EventHandler<MessageEventArgs>(Slash),
-				new EventHandler<MessageEventArgs>(Shout),
+		//This code is a PoS, yeah. Ain't it cool.new Command (
+		private List<Command> GetCommands()
+		{
+			return new List<Command> () {
+				new Command (new EventHandler<MessageEventArgs> (Say)),
+				new Command (new EventHandler<MessageEventArgs>(Help)),
+				new Command (new EventHandler<MessageEventArgs>(Git)),
+				new Command (new EventHandler<MessageEventArgs>(Swole)),
+				new Command (new EventHandler<MessageEventArgs>(Sleep)),
+				new Command (new EventHandler<MessageEventArgs>(UD)),
+				new Command (new EventHandler<MessageEventArgs>(Blame)),
+				new Command (new EventHandler<MessageEventArgs>(Noot),null,null,true),
+				new Command (new EventHandler<MessageEventArgs>(Report),null,null,true),
+				new Command (new EventHandler<MessageEventArgs>(Roll)),
+				new Command (new EventHandler<MessageEventArgs>(Truth)),
+				new Command (new EventHandler<MessageEventArgs>(Flip)),
+				new Command (new EventHandler<MessageEventArgs>(In),null,null,true),
+				new Command (new EventHandler<MessageEventArgs>(Out),null,null,true),
+				new Command (new EventHandler<MessageEventArgs>(NewGame),null,null,true),
+				new Command (new EventHandler<MessageEventArgs>(Subreddit)),
+				new Command (new EventHandler<MessageEventArgs>(Avatar)),
+				new Command (new EventHandler<MessageEventArgs>(WhoIs)),
+				new Command (new EventHandler<MessageEventArgs>(Rip)),
+				new Command (new EventHandler<MessageEventArgs>(Choose)),
+				new Command (new EventHandler<MessageEventArgs>(ServerStats)),
+				new Command (new EventHandler<MessageEventArgs>(Slash),null,null,true),
+				new Command (new EventHandler<MessageEventArgs>(Shout),null,null,true),
+				new Command (new EventHandler<MessageEventArgs>(HesStarkRavingMad),null,null,true,"StarkRavingMad"),
 #if DEBUG
-                //Beta Features
-                //new EventHandler<MessageEventArgs>(Wiki),//No, not even beta
-                new EventHandler<MessageEventArgs>(Reddit),//Out until XML configs are up and running
+				//Beta Features
+				//new EventHandler<MessageEventArgs>(Wiki),//No, not even beta
+				new Command (new EventHandler<MessageEventArgs>(Reddit)),//Out until XML configs are up and running
 #else
-                //Release-Only Features
-                new EventHandler<MessageEventArgs>(Invite),
+				//Release-Only Features
+				new Command (new EventHandler<MessageEventArgs>(Invite)),
 #endif
-            };
-        }
+			};
+		}
 
         #region Simple Text Commands
         private void Choose(object s, MessageEventArgs e)
         {
-            var c = GetAfterCommand(e.Message.Text).Split(';');
+			var c = Command.GetParameters(e.Message.Text).Split(';');
             Client.SendMessage(e.Channel, c[Rand.Next(c.Length)]);
         }
 
@@ -70,12 +71,12 @@ namespace DiscordBot
         {
             var name = e.Message.MentionedUsers.Any() ? e.Message.MentionedUsers.First().Name + " is " : @"They are ";
             Client.SendMessage(e.Channel, name + (Rand.Next(2) == 0 ? "telling the truth." : "lying."));
-        }
+		}
 
-        private void HesStarkRavingMad(object s, MessageEventArgs e)
-        {
-            Client.SendMessage(e.Channel, "Welcome to fucking boatmurdered!");
-        }
+		private void HesStarkRavingMad(object s, MessageEventArgs e)
+		{
+			Client.SendMessage(e.Channel, "Welcome to fucking boatmurdered!");
+		}
 
         private void Blame(object s, MessageEventArgs e)
         {
@@ -85,7 +86,7 @@ namespace DiscordBot
             }
             else
             {
-                Client.SendMessage(e.Channel, $"Fuck you {GetAfterCommand(e.Message.Text).Trim()}");
+				Client.SendMessage(e.Channel, $"Fuck you {Command.GetParameters(e.Message.Text).Trim()}");
             }
         }
 
@@ -96,7 +97,7 @@ namespace DiscordBot
             await Client.EditMessage(m, "noot noot");
         }
 
-        private void Ubreddit(object s, MessageEventArgs e)
+        private void Subreddit(object s, MessageEventArgs e)
         {
             Client.SendMessage(e.Channel, "Subreddit can be found at https://www.reddit.com/r/JCFDiscord/.");
         }
@@ -179,7 +180,7 @@ namespace DiscordBot
         private void WhoIs(object s, MessageEventArgs e)
         {
             var msg = "";
-            var role = e.Server.Roles.Where(x => x.Name.ToLower() == GetAfterCommand(e.Message.Text).ToLower().Trim()).FirstOrDefault();
+			var role = e.Server.Roles.Where(x => x.Name.ToLower() == Command.GetParameters(e.Message.Text).ToLower().Trim()).FirstOrDefault();
             if (!e.Message.MentionedUsers.Any() && role != null)
             {
                 msg = $"```Members in role '{role.Name}'";
@@ -215,7 +216,7 @@ namespace DiscordBot
             Console.WriteLine("\na\n");
             using (var wc = new WebClient())
             {
-                var query = GetAfterCommand(e.Message.Text);
+				var query = Command.GetParameters(e.Message.Text);
                 Console.WriteLine("\nb\n");
                 var postUrl = @"/w/api.php?action=query&format=json&prop=info&inprop=url&redirects";
 
@@ -276,14 +277,14 @@ namespace DiscordBot
 
         private void UD(object s, MessageEventArgs e)//Urban Dictionary
         {
-            Client.SendMessage(e.Channel, $"http://www.urbandictionary.com/define.php?term={GetAfterCommand(e.Message.RawText).Replace(' ', '+')}");
+			Client.SendMessage(e.Channel, $"http://www.urbandictionary.com/define.php?term={Command.GetParameters(e.Message.RawText).Replace(' ', '+')}");
         }
 
         private void Say(object s, MessageEventArgs e)
         {
             if (e.User.Id == USER_JOSH_ID || Rand.Next() % 4 < 3)
             {
-                var msg = GetAfterCommand(e.Message.RawText);
+				var msg = Command.GetParameters(e.Message.RawText);
                 if (msg.StartsWith("!"))
                 {
                     msg = "." + msg;
@@ -300,7 +301,7 @@ namespace DiscordBot
         private void Roll(object s, MessageEventArgs e)
         {
             var reg = new Regex("([0-9]*)[dD]([0-9]*)");
-            var str = GetAfterCommand(e.Message.RawText).Replace("+", " + ").Replace("-", " - ").Split();
+			var str = Command.GetParameters(e.Message.RawText).Replace("+", " + ").Replace("-", " - ").Split();
             var val = 0;
             var add = true;
             foreach (var item in str)
@@ -342,7 +343,7 @@ namespace DiscordBot
         {
             const int NUM_POSTS = 25;
 
-            var sub = (new Reddit()).GetSubreddit(GetAfterCommand(e.Message.Text).Split()[0]);
+			var sub = (new Reddit()).GetSubreddit(Command.GetParameters(e.Message.Text).Split()[0]);
 
             if (sub == null)
             {
@@ -391,10 +392,9 @@ namespace DiscordBot
         {
             var str = new StringBuilder();
             str.AppendLine("Available commands:");
-            foreach (var c in GetCommands().Select(x => x.Method.Name.ToLower()).OrderBy(x => x))
+			foreach (var c in GetCommands().Where(x => !x.Hidden && x.RequiredPermissions == ChannelPermissions.None).OrderBy(x => x.Name))
             {
-                if (c == "noot") continue;
-                str.AppendLine($" - `{PREDICATE}{c}`");
+                str.AppendLine($" - `{PREDICATE}{c.Name}`");
             }
             Client.SendMessage(e.Channel, str.ToString());
         }

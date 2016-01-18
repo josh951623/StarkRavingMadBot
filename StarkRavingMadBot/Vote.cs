@@ -4,7 +4,7 @@
 //using System.Text;
 //using Discord;
 
-//namespace DiscordBot.Commands
+//namespace StarkRavingMadBot
 //{
 //    partial class StarkRavingMadBot
 //    {

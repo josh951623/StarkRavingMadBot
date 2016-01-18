@@ -8,18 +8,25 @@ using Discord;
 using Discord.API;
 using System.Threading;
 
-namespace DiscordBot
+namespace StarkRavingMadBot
 {
     partial class StarkRavingMadBot
-    {
+	{
+		private void Report(object s, MessageEventArgs e) 
+		{
+			if(e.Channel.Name.ToLower() == "staff")
+			{
+				SendBotMessage (e.Server, $"At {DateTime.UtcNow} UTC, {e.User.Name} reported: \n```{Command.GetParameters (e.Message.RawText)}```");
+			}
+		}
+
 		private async void Shout(object s, MessageEventArgs e)
 		{
 			if (e.User.GetServerPermissions ().ManageMessages) {
-				var def = false;
+
 				var timeout = 15;
-				if (!int.TryParse (GetAfterCommand (e.Message.Text).Split () [0], out timeout)) {
+				if (!int.TryParse (Command.GetParameters (e.Message.Text).Split () [0], out timeout)) {
 					timeout = 15;
-					def = true;
 				}
 				timeout = Math.Min (Math.Max (timeout, 10), 300);//10s < x < 30s
 
@@ -50,7 +57,7 @@ namespace DiscordBot
 		{
 			if (e.Message.MentionedUsers.Count() == 1 && e.User.GetServerPermissions().KickMembers ) {
 				var timeout = 15;
-				if (!int.TryParse (GetAfterCommand (e.Message.Text).Split () [0], out timeout)) {
+				if (!int.TryParse (Command.GetParameters (e.Message.Text).Split () [0], out timeout)) {
 					timeout = 15;
 				}
 				timeout = Math.Min (Math.Max (timeout, 10), 60);//10s < x < 60s
@@ -81,7 +88,7 @@ namespace DiscordBot
 
         private async void Invite(object s, MessageEventArgs e)
         {
-			await Client.AcceptInvite (await Client.GetInvite (GetAfterCommand (e.Message.Text).Split () [0]));
+			await Client.AcceptInvite (await Client.GetInvite (Command.GetParameters (e.Message.Text).Split () [0]));
         }
 
         private void Flair(object s, MessageEventArgs e)
