@@ -39,8 +39,10 @@ namespace DiscordBot
                 new EventHandler<MessageEventArgs>(Avatar),
                 new EventHandler<MessageEventArgs>(WhoIs),
                 new EventHandler<MessageEventArgs>(Rip),
-                new EventHandler<MessageEventArgs>(Choose),
-                new EventHandler<MessageEventArgs>(ServerStats),
+				new EventHandler<MessageEventArgs>(Choose),
+				new EventHandler<MessageEventArgs>(ServerStats),
+				new EventHandler<MessageEventArgs>(Slash),
+				new EventHandler<MessageEventArgs>(Shout),
 #if DEBUG
                 //Beta Features
                 //new EventHandler<MessageEventArgs>(Wiki),//No, not even beta
