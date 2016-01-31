@@ -104,7 +104,7 @@ namespace StarkRavingMadBot
                 //do nothing
             }
             var reg = new Regex("[ie][ns][tf][jp]");
-            if (reg.IsMatch(type))
+            if (reg.IsMatch(type) || type == "xxxx")
             {
 
                 var r = e.User.Roles.Where(x => !reg.IsMatch(x.Name.ToLower()) && type != "xxxx").ToList();

@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
+using System.Threading.Tasks;
 using Discord;
-using System.Diagnostics;
-using System.Xml.Linq;
+using ChatterBotAPI;
 
 namespace StarkRavingMadBot
 {
@@ -18,7 +18,10 @@ namespace StarkRavingMadBot
 		public const string PREDICATE = "b$";
 		#else  
 		public const string PREDICATE = "$";
-		#endif
+#endif
+
+        private ChatterBot Cleverbot { get; set; }
+        private Dictionary<long,ChatterBotSession> CleverbotSessions { get; set; }
 
         /****************BOT SETTINGS***************/
         /******************************************/
@@ -36,12 +39,14 @@ namespace StarkRavingMadBot
 			this.Password = pass;
 
 			AttemptConnect ();
-
-			//Add Handlers
-			//Client.LogMessage += (s, e) => Console.WriteLine($"[{e.Severity}] {e.Source}: {e.Message}");
-            
-			Client.MessageReceived += new EventHandler<MessageEventArgs> (Mentioned);
+#if DEBUG
+            //Add Handlers
+            Client.LogMessage += (s, e) => Console.WriteLine($"[{e.Severity}] {e.Source}: {e.Message}");
+#endif
+            Client.MessageReceived += new EventHandler<MessageEventArgs> (Mentioned);
 			Client.MessageReceived += new EventHandler<MessageEventArgs> (ServerCommand);
+
+
 
 			Client.Disconnected += (s, e) => {
 				Console.WriteLine ("Bot was disconnected.");
@@ -51,11 +56,22 @@ namespace StarkRavingMadBot
 			Client.ServerUnavailable += (s, e) => {
 				Console.WriteLine ("Server unavail");
 			};
-
 #if !DEBUG
-            Client.UserJoined += (s, e) => SendBotMessage(e.Server, $"'{e.User.Name}' joined the server");
+            Client.UserJoined += UserJoinedEvent;
 #endif
+
+            Cleverbot = (new ChatterBotFactory()).Create(ChatterBotType.CLEVERBOT);
+            CleverbotSessions = new Dictionary<long, ChatterBotSession>();
 		}
+
+        private async void UserJoinedEvent(object sender, UserEventArgs e)
+        {
+            SendBotMessage(e.Server, $"'{e.User.Name}' joined the server");
+            await Task.Delay(5000);
+            await Client.SendPrivateMessage(e.User, "Welcome to the new and improved MBTI v3. Let our animatronics direct your attention to #rules, and remember to have fun!");
+
+        }
+
         private void AttemptConnect(object sender = null, DisconnectedEventArgs e = null)
         {
             Console.Write("Connecting...");
@@ -115,10 +131,20 @@ namespace StarkRavingMadBot
 
         private void Mentioned(object sender, MessageEventArgs e)
         {
+#if DEBUG
+            if (IsBot(e.User)) return;//Ignores self
+            if (e.Message.Text.StartsWith(PREDICATE)) return;//shouldn't start with predicate
+
             if (e.Message.IsMentioningMe)
             {
-                Senpai(sender, e);
+                Client.API.SendIsTyping(e.Channel.Id);
+                if(!CleverbotSessions.ContainsKey(e.User.Id))
+                {
+                    CleverbotSessions.Add(e.User.Id, Cleverbot.CreateSession());
+                }
+                Client.SendMessage(e.Channel, $"<@{e.User.Id}> {CleverbotSessions[e.User.Id].Think(e.Message.Text)}");
             }
+#endif
         }
 
         private void Senpai(object sender, MessageEventArgs e)

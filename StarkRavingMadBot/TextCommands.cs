@@ -11,6 +11,9 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using MarkdownSharp;
 using RedditSharp;
+using Imgur.API.Authentication.Impl;
+using Imgur.API.Endpoints.Impl;
+using Imgur.API.Models;
 
 namespace StarkRavingMadBot
 {
@@ -40,20 +43,71 @@ namespace StarkRavingMadBot
 				new Command (new EventHandler<MessageEventArgs>(WhoIs)),
 				new Command (new EventHandler<MessageEventArgs>(Rip)),
 				new Command (new EventHandler<MessageEventArgs>(Choose)),
-				new Command (new EventHandler<MessageEventArgs>(ServerStats)),
-				new Command (new EventHandler<MessageEventArgs>(Slash),null,null,true),
-				new Command (new EventHandler<MessageEventArgs>(Shout),null,null,true),
-				new Command (new EventHandler<MessageEventArgs>(HesStarkRavingMad),null,null,true,"StarkRavingMad"),
+                new Command (new EventHandler<MessageEventArgs>(ServerStats)),
+                new Command (new EventHandler<MessageEventArgs>(Spooderman)),
+                new Command (new EventHandler<MessageEventArgs>(HesStarkRavingMad),null,null,true,"StarkRavingMad"),
+                new Command (new EventHandler<MessageEventArgs>(Pengu)),
+                new Command (new EventHandler<MessageEventArgs>(Intensify)),
 #if DEBUG
 				//Beta Features
 				//new EventHandler<MessageEventArgs>(Wiki),//No, not even beta
 				new Command (new EventHandler<MessageEventArgs>(Reddit)),//Out until XML configs are up and running
+				new Command (new EventHandler<MessageEventArgs>(Slash),null,null,true),
+				new Command (new EventHandler<MessageEventArgs>(Shout),null,null,true),
 #else
 				//Release-Only Features
 				new Command (new EventHandler<MessageEventArgs>(Invite)),
 #endif
 			};
 		}
+
+        #region Imgur Images
+        private void Spooderman(object s, MessageEventArgs e)
+        {
+            GetRandFromImgur(e.Channel, "tmWOW", Command.GetParameters(e.Message.Text));
+        }
+
+        private void Pengu(object s, MessageEventArgs e)
+        {
+            GetRandFromImgur(e.Channel, "pgDSZ", Command.GetParameters(e.Message.Text));
+        }
+
+        private void Intensify(object s, MessageEventArgs e)
+        {
+            GetRandFromImgur(e.Channel, "FVmJU", Command.GetParameters(e.Message.Text));
+        }
+
+        private async void GetRandFromImgur(Channel channel, string album, string para)
+        {
+            //Setup imgur
+            var imgCli = new ImgurClient("3479c594880bdd5", "1bab71841002bc7ebe1eae4c7d68378ef5606240");
+            var ep = new AlbumEndpoint(imgCli);
+            var alb = await ep.GetAlbumImagesAsync(album);
+            IImage img;
+
+            //Get image
+            var searchTerms = para.Split().Where(xs => !string.IsNullOrWhiteSpace(xs)).ToList();
+            if (searchTerms.Any())
+            {
+                var max = alb.Max(x => string.IsNullOrWhiteSpace(x.Description) ? 0 : x.Description.Split().Where(xs => !string.IsNullOrWhiteSpace(xs)).Count(xs => searchTerms.Contains(xs)));
+                var imgs = alb.Where(x => (string.IsNullOrWhiteSpace(x.Description) ? 0 : x.Description.Split().Where(xs => !string.IsNullOrWhiteSpace(xs)).Count(xs => searchTerms.Contains(xs))) == max);
+                img = imgs.ElementAt(Rand.Next(imgs.Count()));
+            }
+            else
+            {
+                img = alb.ElementAt(Rand.Next(alb.Count()));
+            }
+
+
+            //Upload Image
+            using (var wc = new WebClient())
+            {
+                var name = $"temp.{img.Link.Split('.').Last()}";
+                wc.DownloadFile(img.Link, name);
+                await Client.SendFile(channel, name);
+            }
+        }
+        #endregion
 
         #region Simple Text Commands
         private void Choose(object s, MessageEventArgs e)
@@ -104,7 +158,7 @@ namespace StarkRavingMadBot
 
         private void Swole(object s, MessageEventArgs e)
         {
-            if (e.Message.User.Name.ToLower() == "swolebro")
+            if (e.User.Id == 100335016025788416)
             {
                 Client.SendMessage(e.Channel, $"Dude, you so swole <@{e.User.Id}>");
             }
@@ -142,7 +196,7 @@ namespace StarkRavingMadBot
 
         private void Rip(object s, MessageEventArgs e)
         {
-            Client.SendMessage(e.Channel, $"Funeral service will be held on {DateTime.Today.AddDays(Rand.Next(14)).ToLongDateString()}");
+            Client.SendMessage(e.Channel, $"Funeral service will be held on {DateTime.Today.AddDays(Rand.Next(12)+3).ToLongDateString()}");
         }
 
         #endregion
@@ -156,6 +210,7 @@ namespace StarkRavingMadBot
             str.AppendLine($"Server Name: {e.Server.Name}");
             str.AppendLine($"ID: {e.Server.Id}");
             str.AppendLine($"Owner: {e.Server.Owner.Name}");
+            str.AppendLine($"Creation Date: {e.Server.Owner.JoinedAt.ToShortDateString()}");
             str.AppendLine($"Text Channels: {e.Server.TextChannels.Count()}");
             str.AppendLine($"Voice Channels: {e.Server.VoiceChannels.Count()}");
             str.AppendLine($"Memebers: {e.Server.Members.Count()}");

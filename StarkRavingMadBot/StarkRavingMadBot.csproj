@@ -33,6 +33,26 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Discord.Net, Version=0.8.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Discord.Net.0.8.1-beta2\lib\net45\Discord.Net.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Discord.Net.Commands, Version=0.8.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Discord.Net.Commands.0.8.1-beta2\lib\net45\Discord.Net.Commands.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Imgur.API, Version=3.6.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Imgur.API.3.6.0\lib\portable-net45+win+MonoAndroid10+xamarinios10+MonoTouch10\Imgur.API.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=8.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.8.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="RestSharp, Version=105.2.3.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\RestSharp.105.2.3\lib\net45\RestSharp.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -41,12 +61,6 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
-    <Reference Include="Discord.Net, Version=0.8.1.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\packages\Discord.Net.0.8.1-beta2\lib\net45\Discord.Net.dll</HintPath>
-    </Reference>
-    <Reference Include="Discord.Net.Commands, Version=0.8.1.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\packages\Discord.Net.Commands.0.8.1-beta2\lib\net45\Discord.Net.Commands.dll</HintPath>
-    </Reference>
     <Reference Include="HtmlAgilityPack, Version=1.4.9.0, Culture=neutral, PublicKeyToken=bd319b19eaf3b43a">
       <HintPath>..\packages\HtmlAgilityPack.1.4.9\lib\Net45\HtmlAgilityPack.dll</HintPath>
     </Reference>
@@ -59,20 +73,23 @@
     <Reference Include="MarkdownSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
       <HintPath>..\packages\MarkdownSharp.1.13.0.0\lib\35\MarkdownSharp.dll</HintPath>
     </Reference>
-    <Reference Include="Newtonsoft.Json, Version=7.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed">
-      <HintPath>..\packages\Newtonsoft.Json.7.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
-    </Reference>
     <Reference Include="RedditSharp, Version=1.0.20.0, Culture=neutral, PublicKeyToken=null">
       <HintPath>..\packages\RedditSharp.1.0.20\lib\RedditSharp.dll</HintPath>
-    </Reference>
-    <Reference Include="RestSharp, Version=105.2.3.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\packages\RestSharp.105.2.3\lib\net452\RestSharp.dll</HintPath>
     </Reference>
     <Reference Include="websocket-sharp, Version=1.0.2.36589, Culture=neutral, PublicKeyToken=5660b08a1845a91e">
       <HintPath>..\packages\WebSocketSharp.1.0.3-rc9\lib\websocket-sharp.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ChatterBotAPI\AssemblyInfo.cs" />
+    <Compile Include="ChatterBotAPI\ChatterBot.cs" />
+    <Compile Include="ChatterBotAPI\ChatterBotFactory.cs" />
+    <Compile Include="ChatterBotAPI\ChatterBotSession.cs" />
+    <Compile Include="ChatterBotAPI\ChatterBotThought.cs" />
+    <Compile Include="ChatterBotAPI\ChatterBotType.cs" />
+    <Compile Include="ChatterBotAPI\Cleverbot.cs" />
+    <Compile Include="ChatterBotAPI\Pandorabots.cs" />
+    <Compile Include="ChatterBotAPI\Utils.cs" />
     <Compile Include="ModCommands.cs" />
     <Compile Include="TextCommands.cs" />
     <Compile Include="Program.cs" />
@@ -84,7 +101,12 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <None Include="ChatterBotAPI\README.md" />
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="ChatterBotAPI\ChatterBotAPI.csproj" />
+    <Content Include="ChatterBotAPI\lgpl-3.0.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
