@@ -41,12 +41,12 @@ namespace StarkRavingMadBot
 			AttemptConnect ();
 #if DEBUG
             //Add Handlers
-            Client.LogMessage += (s, e) => Console.WriteLine($"[{e.Severity}] {e.Source}: {e.Message}");
+            //Client.LogMessage += (s, e) => Console.WriteLine($"[{e.Severity}] {e.Source}: {e.Message}");
 #endif
             Client.MessageReceived += new EventHandler<MessageEventArgs> (Mentioned);
 			Client.MessageReceived += new EventHandler<MessageEventArgs> (ServerCommand);
 
-
+            new Timer((e) => CheckForDeadChannels(), null, 0, (int)TimeSpan.FromMinutes(1).TotalMilliseconds);
 
 			Client.Disconnected += (s, e) => {
 				Console.WriteLine ("Bot was disconnected.");

@@ -48,6 +48,8 @@ namespace StarkRavingMadBot
                 new Command (new EventHandler<MessageEventArgs>(HesStarkRavingMad),null,null,true,"StarkRavingMad"),
                 new Command (new EventHandler<MessageEventArgs>(Pengu)),
                 new Command (new EventHandler<MessageEventArgs>(Intensify)),
+                new Command (new EventHandler<MessageEventArgs>(Color)),
+                new Command (new EventHandler<MessageEventArgs>(ChannelSearch),null,null,true,"c"),
 #if DEBUG
 				//Beta Features
 				//new EventHandler<MessageEventArgs>(Wiki),//No, not even beta
@@ -264,70 +266,6 @@ namespace StarkRavingMadBot
                 msg = sb.ToString();
             }
             Client.SendMessage(e.Channel, msg);
-        }
-
-        private void Wiki(object s, MessageEventArgs e)
-        {
-            Console.WriteLine("\na\n");
-            using (var wc = new WebClient())
-            {
-				var query = Command.GetParameters(e.Message.Text);
-                Console.WriteLine("\nb\n");
-                var postUrl = @"/w/api.php?action=query&format=json&prop=info&inprop=url&redirects";
-
-                Console.WriteLine("\nc\n");
-                var url = $"https://simple.wikipedia.org{postUrl}&titles={Uri.EscapeUriString(query)}";
-                var json = wc.DownloadString(url);
-                url = Regex.Match(json, "\"fullurl\":\"(.*?)\"").Groups[1].Value;
-                var title = Regex.Match(json, "\"title\":\"(.*?)\"").Groups[1].Value;
-                Console.WriteLine("\nd\n");
-
-
-                var markdown = "";
-                Console.WriteLine("\ne\n");
-                try
-                {
-                    markdown = wc.DownloadString($"{url}?action=raw");
-                    Console.WriteLine("\nf\n");
-                }
-                //catch//Try Wikipedia on fail
-                //{
-                //    url = $"https://en.wikipedia.org{postUrl}&titles={Uri.EscapeUriString(query)}";
-                //    json = wc.DownloadString(url);
-
-                //    url = Regex.Match(json, "\"fullurl\":\"(.*?)\"").Groups[1].Value;
-                //    title = Regex.Match(json, "\"title\":\"(.*?)\"").Groups[1].Value;
-
-                //    try
-                //    {
-                //        markdown = wc.DownloadString($"{url}?action=raw");
-                //    }
-                catch
-                {
-                    Client.SendMessage(e.Channel, "_No Results. Try Different Capitalization._");
-                    Console.WriteLine("\ng\n");
-                }
-                //}
-
-
-                Console.WriteLine("\nh\n");
-
-                markdown = markdown.Remove(markdown.IndexOf("=="));//First Paragraph
-
-
-
-                markdown = Regex.Replace(markdown, @"\[\[File:.*?\]\]", "");
-                markdown = Regex.Replace(markdown, @"\[\[", "");
-                markdown = Regex.Replace(markdown, @"\]\]", "");
-                markdown = markdown.Replace('\'', '`');
-                markdown = markdown.Replace("```", "`");
-
-                Console.WriteLine("\ni\n");
-
-                Client.SendMessage(e.Channel, $"**{title}**\n---\n{markdown}".Remove(1999));
-                Console.WriteLine("\ni\n");
-
-            }
         }
 
         private void UD(object s, MessageEventArgs e)//Urban Dictionary

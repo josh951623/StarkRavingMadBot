@@ -114,5 +114,92 @@ namespace StarkRavingMadBot
                 Client.SendMessage(e.Channel, $"Changed '{e.User.Name}'s type to {type.ToUpper()}");
             }
         }
+
+        private async void Color(object s, MessageEventArgs e)
+        {
+            var reg = new Regex("[0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F]");
+            var cl = Command.GetParameters(e.Message.Text).ToLower();
+            if (!reg.IsMatch(cl)) return;
+
+            var cx = e.Server.Roles.ToList().Where(x => x.Name.Equals(cl)).ToList();
+            while(cx.Count > 1)//To rid of dups created by b7
+            {
+                await Client.DeleteRole(cx.First());
+                cx.RemoveAt(0);
+            }
+            var c = cx.SingleOrDefault();
+            if (c == null)
+            {
+                await Client.CreateRole(e.Server, cl);
+                c = e.Server.Roles.Where(x => x.Name == cl).Single();
+                await Client.EditRole(c, null, ServerPermissions.None, new Color(Convert.ToUInt32(cl, 16)), null, 0);
+            }
+
+            var r = e.User.Roles.Where(x => !reg.IsMatch(x.Name)).ToList();
+
+            r.Add(c);
+            await Client.EditUser(e.User, null, null, r);
+
+            await Client.SendMessage(e.Channel, $"Changed '{e.User.Name}'s color to #{cl}");
+
+            Client.GetServer(e.Server.Id).Roles.Where(x => !x.Members.Any() && reg.IsMatch(x.Name)).ToList().ForEach(x => { Client.DeleteRole(x); });
+        }
+
+        private IEnumerable<Channel> GetTempChannels(Server s)
+        {
+            var self = Client.GetUser(s, Client.CurrentUserId);
+            var id = s.EveryoneRole.Id;
+            return s.TextChannels
+                .Where(xx => !xx.PermissionOverwrites
+                    .Where(x =>
+                        (self.Roles.Select(xy => xy.Id).Contains(x.TargetId) &&//is part of role
+                        (x.Permissions.ManagePermissions ?? true) &&//and role is denied perm editing
+                        x.TargetId != s.EveryoneRole.Id))
+                    .Any())
+                .OrderBy(x => x.Id);
+        }
+
+        private IEnumerable<Channel> GetDefaultChannels(Server s)
+        {
+            var self = Client.GetUser(s, Client.CurrentUserId);
+            return s.TextChannels
+                .Where(xx =>
+                !(xx.PermissionOverwrites.Where(x => x.TargetId == s.EveryoneRole.Id).Single().Permissions.ReadMessages ?? true) &&//Everyone can read
+                !xx.PermissionOverwrites
+                    .Where(x => !(
+                        self.Roles.Select(xy => xy.Id).Contains(x.TargetId) &&//is part of role
+                        (x.Permissions.ManagePermissions ?? true)))//and role is denied perm editing
+                    .Any())
+                .OrderBy(x => x.Id);
+        }
+
+        private void ChannelSearch(object s, MessageEventArgs e)
+        {
+            if (e.Server.Id != 135433344140705793) return;
+            var str = Command.GetParameters(e.Message.Text).ToLower();
+            var self = Client.GetUser(e.Server, Client.CurrentUserId);
+            var all = GetDefaultChannels(e.Server);
+            //var l = string.IsNullOrWhiteSpace(str) 
+            //    ? all.Take(10).ToList()
+            //    : all.Where(x=>x.Name.ToLower().Contains(str)).Take(10).ToList();
+
+            var l = all.Take(10).ToList();
+            var st = new StringBuilder();
+
+            foreach(var i in l)
+            {
+                st.AppendLine($"{all.Select(x => x.Id).ToList().IndexOf(i.Id) + 1}. {i.Name}");
+            }
+
+            Client.SendMessage(e.Channel, st.ToString());
+        }
+
+        private void CheckForDeadChannels()
+        {
+            var s = Client.GetServer(135433344140705793);
+        }
+
+
+
     }
 }
