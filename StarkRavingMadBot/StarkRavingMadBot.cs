@@ -44,7 +44,11 @@ namespace StarkRavingMadBot
             //Client.LogMessage += (s, e) => Console.WriteLine($"[{e.Severity}] {e.Source}: {e.Message}");
 #endif
             Client.MessageReceived += new EventHandler<MessageEventArgs> (Mentioned);
-			Client.MessageReceived += new EventHandler<MessageEventArgs> (ServerCommand);
+            Client.MessageReceived += new EventHandler<MessageEventArgs>(ServerCommand);
+
+#if !DEBUG
+            Client.MessageReceived += new EventHandler<MessageEventArgs>(JangoIsTalkingAboutHitlerAgain);
+#endif
 
             new Timer((e) => CheckForDeadChannels(), null, 0, (int)TimeSpan.FromMinutes(1).TotalMilliseconds);
 

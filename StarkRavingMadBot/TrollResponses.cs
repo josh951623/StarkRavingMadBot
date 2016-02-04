@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Discord;
@@ -32,6 +30,7 @@ namespace StarkRavingMadBot
         public int n = 0;
         public void JangoIsTalkingAboutHitlerAgain(object sender, MessageEventArgs e)
         {
+            if (IsBot(e.User)) return;
             var hitlerWords = new List<string>()
             {
                 "hitler",
@@ -40,6 +39,8 @@ namespace StarkRavingMadBot
                 "reich",
                 "himmler",
                 "heil",
+                "jew",
+                "auschwitz",
                 "1939",
                 "1940",
                 "1941",
@@ -51,11 +52,11 @@ namespace StarkRavingMadBot
             };
 
             //No hitler talk for jango
-            if (e.User.Name.ToLower().Contains("jango") && hitlerWords.Any(x => e.Message.Text.ToLower().Contains(x) || hitlerWords.Contains((new Regex(@"[^\d]")).Replace(e.Message.Text, "")) ))
+            if (e.User.Id == 119296324783964160 && hitlerWords.Any(x => e.Message.Text.ToLower().Contains(x)))
             {
                 if (--n < 0)
                 {
-                    n = 2;
+                    n = 1;
                     Client.SendMessage(e.Channel, "Godwin says you lack creativity. Try again.").Wait();
                 }
             }

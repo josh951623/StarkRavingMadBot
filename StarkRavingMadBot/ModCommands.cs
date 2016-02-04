@@ -5,8 +5,6 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Discord;
-using Discord.API;
-using System.Threading;
 
 namespace StarkRavingMadBot
 {
@@ -132,7 +130,7 @@ namespace StarkRavingMadBot
             {
                 await Client.CreateRole(e.Server, cl);
                 c = e.Server.Roles.Where(x => x.Name == cl).Single();
-                await Client.EditRole(c, null, ServerPermissions.None, new Color(Convert.ToUInt32(cl, 16)), null, 0);
+                await Client.EditRole(c, null, ServerPermissions.None, new Color(Convert.ToUInt32(cl, 16)), null, e.Server.Roles.Count() - 1);
             }
 
             var r = e.User.Roles.Where(x => !reg.IsMatch(x.Name)).ToList();

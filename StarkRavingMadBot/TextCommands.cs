@@ -1,15 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Discord;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using MarkdownSharp;
 using RedditSharp;
 using Imgur.API.Authentication.Impl;
 using Imgur.API.Endpoints.Impl;
@@ -23,7 +19,7 @@ namespace StarkRavingMadBot
 		private List<Command> GetCommands()
 		{
 			return new List<Command> () {
-				new Command (new EventHandler<MessageEventArgs> (Say)),
+				new Command (new EventHandler<MessageEventArgs>(Say)),
 				new Command (new EventHandler<MessageEventArgs>(Help)),
 				new Command (new EventHandler<MessageEventArgs>(Git)),
 				new Command (new EventHandler<MessageEventArgs>(Swole)),
@@ -50,10 +46,11 @@ namespace StarkRavingMadBot
                 new Command (new EventHandler<MessageEventArgs>(Intensify)),
                 new Command (new EventHandler<MessageEventArgs>(Color)),
                 new Command (new EventHandler<MessageEventArgs>(ChannelSearch),null,null,true,"c"),
+                new Command (new EventHandler<MessageEventArgs>(Doot)),
+                new Command (new EventHandler<MessageEventArgs>(Reddit)),
 #if DEBUG
 				//Beta Features
 				//new EventHandler<MessageEventArgs>(Wiki),//No, not even beta
-				new Command (new EventHandler<MessageEventArgs>(Reddit)),//Out until XML configs are up and running
 				new Command (new EventHandler<MessageEventArgs>(Slash),null,null,true),
 				new Command (new EventHandler<MessageEventArgs>(Shout),null,null,true),
 #else
@@ -136,13 +133,22 @@ namespace StarkRavingMadBot
 
         private void Blame(object s, MessageEventArgs e)
         {
-            if (e.Message.MentionedUsers.Any())
+            if(
+                e.Message.MentionedUsers.FirstOrDefault()?.Id == 121281613660160000 ||
+                e.Message.MentionedUsers.FirstOrDefault()?.Id == 134799811147726848 ||
+                e.Message.MentionedUsers.FirstOrDefault()?.Id == USER_JOSH_ID ||
+                e.Message.Text.ToLower().Contains("josh") ||
+                e.Message.Text.ToLower().Contains("stark"))
             {
-                Client.SendMessage(e.Channel, $"Fuck you {e.Message.MentionedUsers.First().Name}");
+                Client.SendMessage(e.Channel, $"Nah, Josh and his bots are the best...");
+            }
+            else if (e.Message.MentionedUsers.Any())
+            {
+                Client.SendMessage(e.Channel, $"*Thanks* {e.Message.MentionedUsers.First().Name}");
             }
             else
             {
-				Client.SendMessage(e.Channel, $"Fuck you {Command.GetParameters(e.Message.Text).Trim()}");
+				Client.SendMessage(e.Channel, $"Thanks {Command.GetParameters(e.Message.Text).Trim()}");
             }
         }
 
@@ -151,6 +157,13 @@ namespace StarkRavingMadBot
             var m = await Client.SendMessage(e.Channel, "Penguins will rule the earth!");
             await Task.Delay(1000);
             await Client.EditMessage(m, "noot noot");
+        }
+
+        private async void Doot(object s, MessageEventArgs e)
+        {
+            var m = await Client.SendMessage(e.Channel, "doot doot");
+            await Task.Delay(1000);
+            await Client.EditMessage(m, "doot doot (thank mr skeltal)");
         }
 
         private void Subreddit(object s, MessageEventArgs e)
