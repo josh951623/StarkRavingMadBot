@@ -48,6 +48,7 @@ namespace StarkRavingMadBot
                 new Command (new EventHandler<MessageEventArgs>(ChannelSearch),null,null,true,"c"),
                 new Command (new EventHandler<MessageEventArgs>(Doot)),
                 new Command (new EventHandler<MessageEventArgs>(Reddit)),
+                new Command (new EventHandler<MessageEventArgs>(Functions)),
 #if DEBUG
 				//Beta Features
 				//new EventHandler<MessageEventArgs>(Wiki),//No, not even beta
@@ -109,6 +110,69 @@ namespace StarkRavingMadBot
         #endregion
 
         #region Simple Text Commands
+        private void Functions(object s, MessageEventArgs e)
+        {
+            var f = new StringBuilder();
+            foreach(var t in Command.GetParameters(e.Message.Text).ToLower().Split())
+            {
+                switch (t)
+                {
+                    case "intj":
+                        f.AppendLine("INTJ: Ni Te Fi Se");
+                        break;
+                    case "entj":
+                        f.AppendLine("ENTJ: Te Ni Se Fi");
+                        break;
+                    case "intp":
+                        f.AppendLine("INTP: Ti Ne Si Fe");
+                        break;
+                    case "entp":
+                        f.AppendLine("ENTP: Ne Ti Fe Si");
+                        break;
+
+                    case "infj":
+                        f.AppendLine("INFJ: Ni Fe Ti Se");
+                        break;
+                    case "enfj":
+                        f.AppendLine("ENFJ: Fe Ni Se Ti");
+                        break;
+                    case "infp":
+                        f.AppendLine("INFP: Ni Fe Ti Se");
+                        break;
+                    case "enfp":
+                        f.AppendLine("ENFP: Ne Fi Te Si");
+                        break;
+
+                    case "istp":
+                        f.AppendLine("ISTP: Ti Se Ni Fe");
+                        break;
+                    case "estp":
+                        f.AppendLine("ESTP: Se Ti Te Ni");
+                        break;
+                    case "isfp":
+                        f.AppendLine("ISFP: Fi Se Ni Te");
+                        break;
+                    case "esfp":
+                        f.AppendLine("ESFP: Se Fi Te Ni");
+                        break;
+
+                    case "istj":
+                        f.AppendLine("ISTJ: Si Te Fi Ne");
+                        break;
+                    case "estj":
+                        f.AppendLine("ESTJ: Te Si Ne Fi");
+                        break;
+                    case "isfj":
+                        f.AppendLine("ISFJ: Si Fe Ti Ne");
+                        break;
+                    case "esfj":
+                        f.AppendLine("ESFJ: Fe Si Ne Ti");
+                        break;
+                }
+            }
+            if (f.Length > 0) Client.SendMessage(e.Channel, $"```{f.ToString()}```");
+        }
+
         private void Choose(object s, MessageEventArgs e)
         {
 			var c = Command.GetParameters(e.Message.Text).Split(';');
@@ -255,6 +319,49 @@ namespace StarkRavingMadBot
             {
                 msg = $"```Members in role '{role.Name}'";
                 foreach (var m in role.Members) msg += $"\n - {m.Name}";
+                msg += "```";
+            }
+            else if (Command.GetParameters(e.Message.Text).ToLower().StartsWith("new"))
+            {
+                int hours = 0;
+                bool y;
+                try {
+                    y = int.TryParse(Command.GetParameters(e.Message.Text).Split()[1], out hours);
+                } catch {
+                    y = false;
+                }
+                hours = y ? hours * 24 : 48;
+                msg = $"```Members who have joined in the last {hours} hours ({hours/24} days):";
+                foreach (var m in e.Server.Members.Where(x => x.JoinedAt.CompareTo(DateTime.Now.AddHours(-hours)) >= 0).OrderBy(x => x.Name)) msg += $"\n - {m.Name}";
+                msg += "```";
+            }
+            else if (Command.GetParameters(e.Message.Text).ToLower().StartsWith("nonmem"))
+            {
+
+
+                var r = e.Server.Roles.Where(x => x.Name.ToLower() == "member").Single();
+
+                int hours = 0;
+                var f = "";
+                try
+                {
+                    f = Command.GetParameters(e.Message.Text).Split()[1];
+                }
+                catch
+                {
+
+                }
+                if (int.TryParse(f, out hours))
+                {
+                    hours *= 24;
+                    msg = $"```Users without member tag active in the last {hours} hours ({hours/24} days):";
+                    foreach (var m in e.Server.Members.Where(x => !x.HasRole(r) && (x.LastActivityAt?.CompareTo(DateTime.Now.AddHours(-hours)) ?? -1) > 0).OrderBy(x => x.Name)) msg += $"\n - {m.Name}";
+                }
+                else
+                {
+                    msg = $"```Users without member tag:";
+                    foreach (var m in e.Server.Members.Where(x => !x.HasRole(r)).OrderBy(x => x.Name)) msg += $"\n - {m.Name}";
+                }
                 msg += "```";
             }
             else

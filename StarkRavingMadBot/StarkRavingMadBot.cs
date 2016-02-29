@@ -70,9 +70,9 @@ namespace StarkRavingMadBot
 
         private async void UserJoinedEvent(object sender, UserEventArgs e)
         {
-            SendBotMessage(e.Server, $"'{e.User.Name}' joined the server");
+            SendBotMessage(e.Server, $"'{e.User.Name}' (UID: {e.User.Id}) joined the server");
             await Task.Delay(5000);
-            await Client.SendPrivateMessage(e.User, "Welcome to the new and improved MBTI v3. Let our animatronics direct your attention to #rules, and remember to have fun!");
+            await Client.SendPrivateMessage(e.User, "Welcome to the new and improved MBTI v3. Let our animatronics direct your attention to #code-of-conduct (they're out of date right now we're working on a revision....), and remember to have fun!");
 
         }
 
@@ -126,11 +126,6 @@ namespace StarkRavingMadBot
             Flair(sender, e);
 			var c = GetCommands ();
 			c.Where(x => x.IsCommand(e.Message.Text)).FirstOrDefault().Method.Invoke(sender, e);
-
-//            if(rt == "starkravingmad")//suprah seceret
-//            {
-//                HesStarkRavingMad(sender, e);
-//            }
         }
 
         private void Mentioned(object sender, MessageEventArgs e)
