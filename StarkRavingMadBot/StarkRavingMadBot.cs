@@ -21,7 +21,7 @@ namespace StarkRavingMadBot
 #endif
 
         private ChatterBot Cleverbot { get; set; }
-        private Dictionary<long,ChatterBotSession> CleverbotSessions { get; set; }
+        private Dictionary<ulong,ChatterBotSession> CleverbotSessions { get; set; }
 
         /****************BOT SETTINGS***************/
         /******************************************/
@@ -49,14 +49,6 @@ namespace StarkRavingMadBot
 #if !DEBUG
             Client.MessageReceived += new EventHandler<MessageEventArgs>(JangoIsTalkingAboutHitlerAgain);
 #endif
-
-            new Timer((e) => CheckForDeadChannels(), null, 0, (int)TimeSpan.FromMinutes(1).TotalMilliseconds);
-
-			Client.Disconnected += (s, e) => {
-				Console.WriteLine ("Bot was disconnected.");
-				AttemptConnect ();
-			};
-
 			Client.ServerUnavailable += (s, e) => {
 				Console.WriteLine ("Server unavail");
 			};
@@ -65,14 +57,14 @@ namespace StarkRavingMadBot
 #endif
 
             Cleverbot = (new ChatterBotFactory()).Create(ChatterBotType.CLEVERBOT);
-            CleverbotSessions = new Dictionary<long, ChatterBotSession>();
+            CleverbotSessions = new Dictionary<ulong, ChatterBotSession>();
 		}
 
         private async void UserJoinedEvent(object sender, UserEventArgs e)
         {
             SendBotMessage(e.Server, $"'{e.User.Name}' (UID: {e.User.Id}) joined the server");
             await Task.Delay(5000);
-            await Client.SendPrivateMessage(e.User, "Welcome to the new and improved MBTI v3. Let our animatronics direct your attention to #code-of-conduct (they're out of date right now we're working on a revision....), and remember to have fun!");
+            await e.User.SendMessage("Welcome to the new and improved MBTI v3. Let our animatronics direct your attention to #code-of-conduct (they're out of date right now we're working on a revision....), and remember to have fun!");
 
         }
 
@@ -80,7 +72,7 @@ namespace StarkRavingMadBot
         {
             Console.Write("Connecting...");
             Client.Connect(this.Email, this.Password);
-            while (Client.State != DiscordClientState.Connected)
+            while (Client.State != ConnectionState.Connected)
             {
                 Thread.Sleep(500);
                 Console.Write(".");
@@ -90,8 +82,8 @@ namespace StarkRavingMadBot
 
         public void SendBotMessage(Server s, string msg)
         {
-            var c = s.Channels.Where(x => x.Name.ToLower() == "bot-messages").SingleOrDefault();
-            if (c != null) Client.SendMessage(c, msg);
+            var c = s.TextChannels.Where(x => x.Name.ToLower() == "bot-messages").SingleOrDefault();
+            if (c != null) c.SendMessage(msg);
         }
 
         public void Start()
@@ -99,12 +91,11 @@ namespace StarkRavingMadBot
             Handler.WaitOne();
         }
         
-        private bool IsBot(long id)
+        private bool IsBot(ulong id)
         {
-            var list = new List<long>()
+            var list = new List<ulong>()
             {
                 133695051099406336,//Typey
-                Client.CurrentUserId,//Self just in case
                 121281613660160000,//Stark
                 134799811147726848,//Beta Stark
             };
@@ -134,14 +125,14 @@ namespace StarkRavingMadBot
             if (IsBot(e.User)) return;//Ignores self
             if (e.Message.Text.StartsWith(PREDICATE)) return;//shouldn't start with predicate
 
-            if (e.Message.IsMentioningMe)
+            if (e.Message.IsMentioningMe())
             {
-                Client.API.SendIsTyping(e.Channel.Id);
+                e.Channel.SendIsTyping();
                 if(!CleverbotSessions.ContainsKey(e.User.Id))
                 {
                     CleverbotSessions.Add(e.User.Id, Cleverbot.CreateSession());
                 }
-                Client.SendMessage(e.Channel, $"<@{e.User.Id}> {CleverbotSessions[e.User.Id].Think(e.Message.Text)}");
+                e.Channel.SendMessage( $"<@{e.User.Id}> {CleverbotSessions[e.User.Id].Think(e.Message.Text)}");
             }
 #endif
         }
@@ -152,11 +143,11 @@ namespace StarkRavingMadBot
             {
                 if (e.Message.RawText.ToLower().Contains("good"))
                 {
-                    Client.SendMessage(e.Channel, "☜(⌒▽⌒)☞");
+                    e.Channel.SendMessage("☜(⌒▽⌒)☞");
                 }
                 if (e.Message.RawText.ToLower().Contains("bad"))
                 {
-                    Client.SendMessage(e.Channel, "ಥ_ಥ");
+                    e.Channel.SendMessage("ಥ_ಥ");
                 }
             }
         }
@@ -165,7 +156,7 @@ namespace StarkRavingMadBot
         {
             if (e.Channel.Id == 125011643515011072 && Regex.Replace(e.Message.Text, @"[^a-zA-Z0-9]", "").ToLower() == "posted")//fite
             {
-                Client.SendMessage(Client.GetChannel(125836510971822080), $"**<@{e.User.Id}> Posted.**");
+                Client.GetChannel(125836510971822080).SendMessage($"**<@{e.User.Id}> Posted.**");
             }
         }
 

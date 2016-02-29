@@ -13,7 +13,7 @@ namespace StarkRavingMadBot
 		public ChannelPermissions RequiredPermissions { get; set; }
 		public List<Command> Commands {get;set;}
 
-		public Command(EventHandler<MessageEventArgs> method, ChannelPermissions perms = null, string help = null, bool hidden = false, string nameOverride = null)
+		public Command(EventHandler<MessageEventArgs> method, ChannelPermissions? perms = null, string help = null, bool hidden = false, string nameOverride = null)
 		{
 			this.Method 	= method;
 			this.RequiredPermissions = perms ?? ChannelPermissions.None;

@@ -45,15 +45,14 @@ namespace StarkRavingMadBot
                 new Command (new EventHandler<MessageEventArgs>(Pengu)),
                 new Command (new EventHandler<MessageEventArgs>(Intensify)),
                 new Command (new EventHandler<MessageEventArgs>(Color)),
-                new Command (new EventHandler<MessageEventArgs>(ChannelSearch),null,null,true,"c"),
                 new Command (new EventHandler<MessageEventArgs>(Doot)),
                 new Command (new EventHandler<MessageEventArgs>(Reddit)),
                 new Command (new EventHandler<MessageEventArgs>(Functions)),
 #if DEBUG
 				//Beta Features
 				//new EventHandler<MessageEventArgs>(Wiki),//No, not even beta
-				new Command (new EventHandler<MessageEventArgs>(Slash),null,null,true),
-				new Command (new EventHandler<MessageEventArgs>(Shout),null,null,true),
+				//new Command (new EventHandler<MessageEventArgs>(Slash),null,null,true),
+				//new Command (new EventHandler<MessageEventArgs>(Shout),null,null,true),
 #else
 				//Release-Only Features
 				new Command (new EventHandler<MessageEventArgs>(Invite)),
@@ -104,7 +103,7 @@ namespace StarkRavingMadBot
             {
                 var name = $"temp.{img.Link.Split('.').Last()}";
                 wc.DownloadFile(img.Link, name);
-                await Client.SendFile(channel, name);
+                await channel.SendFile(name);
             }
         }
         #endregion
@@ -170,29 +169,29 @@ namespace StarkRavingMadBot
                         break;
                 }
             }
-            if (f.Length > 0) Client.SendMessage(e.Channel, $"```{f.ToString()}```");
+            if (f.Length > 0) e.Channel.SendMessage($"```{f.ToString()}```");
         }
 
         private void Choose(object s, MessageEventArgs e)
         {
 			var c = Command.GetParameters(e.Message.Text).Split(';');
-            Client.SendMessage(e.Channel, c[Rand.Next(c.Length)]);
+            e.Channel.SendMessage(c[Rand.Next(c.Length)]);
         }
 
         private void Flip(object s, MessageEventArgs e)
         {
-            Client.SendMessage(e.Channel, Rand.Next(2) == 0 ? "Heads" : "Tails");
+            e.Channel.SendMessage(Rand.Next(2) == 0 ? "Heads" : "Tails");
         }
 
         private void Truth(object s, MessageEventArgs e)
         {
             var name = e.Message.MentionedUsers.Any() ? e.Message.MentionedUsers.First().Name + " is " : @"They are ";
-            Client.SendMessage(e.Channel, name + (Rand.Next(2) == 0 ? "telling the truth." : "lying."));
+            e.Channel.SendMessage(name + (Rand.Next(2) == 0 ? "telling the truth." : "lying."));
 		}
 
 		private void HesStarkRavingMad(object s, MessageEventArgs e)
 		{
-			Client.SendMessage(e.Channel, "Welcome to fucking boatmurdered!");
+			e.Channel.SendMessage("Welcome to fucking boatmurdered!");
 		}
 
         private void Blame(object s, MessageEventArgs e)
@@ -204,50 +203,50 @@ namespace StarkRavingMadBot
                 e.Message.Text.ToLower().Contains("josh") ||
                 e.Message.Text.ToLower().Contains("stark"))
             {
-                Client.SendMessage(e.Channel, $"Nah, Josh and his bots are the best...");
+                e.Channel.SendMessage($"Nah, Josh and his bots are the best...");
             }
             else if (e.Message.MentionedUsers.Any())
             {
-                Client.SendMessage(e.Channel, $"*Thanks* {e.Message.MentionedUsers.First().Name}");
+                e.Channel.SendMessage($"*Thanks* {e.Message.MentionedUsers.First().Name}");
             }
             else
             {
-				Client.SendMessage(e.Channel, $"Thanks {Command.GetParameters(e.Message.Text).Trim()}");
+				e.Channel.SendMessage($"Thanks {Command.GetParameters(e.Message.Text).Trim()}");
             }
         }
 
         private async void Noot(object s, MessageEventArgs e)
         {
-            var m = await Client.SendMessage(e.Channel, "Penguins will rule the earth!");
+            var m = await e.Channel.SendMessage("Penguins will rule the earth!");
             await Task.Delay(1000);
-            await Client.EditMessage(m, "noot noot");
+            await m.Edit("noot noot");
         }
 
         private async void Doot(object s, MessageEventArgs e)
         {
-            var m = await Client.SendMessage(e.Channel, "doot doot");
+            var m = await e.Channel.SendMessage("doot doot");
             await Task.Delay(1000);
-            await Client.EditMessage(m, "doot doot (thank mr skeltal)");
+            await m.Edit("doot doot (thank mr skeltal)");
         }
 
         private void Subreddit(object s, MessageEventArgs e)
         {
-            Client.SendMessage(e.Channel, "Subreddit can be found at https://www.reddit.com/r/JCFDiscord/.");
+            e.Channel.SendMessage("Subreddit can be found at https://www.reddit.com/r/JCFDiscord/.");
         }
 
         private void Swole(object s, MessageEventArgs e)
         {
             if (e.User.Id == 100335016025788416)
             {
-                Client.SendMessage(e.Channel, $"Dude, you so swole <@{e.User.Id}>");
+                e.Channel.SendMessage($"Dude, you so swole <@{e.User.Id}>");
             }
             else if (e.Message.Channel.Name.Contains("fitness") || e.Message.Channel.Name.Contains("swole"))
             {
-                Client.SendMessage(e.Channel, $"<#{e.Channel.Id}> is the best place to get swole with swolebro.");
+                e.Channel.SendMessage($"<#{e.Channel.Id}> is the best place to get swole with swolebro.");
             }
             else
             {
-                Client.SendMessage(e.Channel, $"Too bad you're not as swole as swolebro <@{e.User.Id}>.");
+                e.Channel.SendMessage($"Too bad you're not as swole as swolebro <@{e.User.Id}>.");
             }
         }
 
@@ -265,17 +264,17 @@ namespace StarkRavingMadBot
 
             if (e.Message.MentionedUsers.Any())
             {
-                Client.SendMessage(e.Channel, $"{msg} <@{e.Message.MentionedUsers.First().Id}>.");
+                e.Channel.SendMessage($"{msg} <@{e.Message.MentionedUsers.First().Id}>.");
             }
             else
             {
-                Client.SendMessage(e.Channel, $"{msg}.");
+                e.Channel.SendMessage($"{msg}.");
             }
         }
 
         private void Rip(object s, MessageEventArgs e)
         {
-            Client.SendMessage(e.Channel, $"Funeral service will be held on {DateTime.Today.AddDays(Rand.Next(12)+3).ToLongDateString()}");
+            e.Channel.SendMessage($"Funeral service will be held on {DateTime.Today.AddDays(Rand.Next(12)+3).ToLongDateString()}");
         }
 
         #endregion
@@ -292,10 +291,10 @@ namespace StarkRavingMadBot
             str.AppendLine($"Creation Date: {e.Server.Owner.JoinedAt.ToShortDateString()}");
             str.AppendLine($"Text Channels: {e.Server.TextChannels.Count()}");
             str.AppendLine($"Voice Channels: {e.Server.VoiceChannels.Count()}");
-            str.AppendLine($"Memebers: {e.Server.Members.Count()}");
+            str.AppendLine($"Memebers: {e.Server.Users.Count()}");
             str.AppendLine($"```");
 
-            Client.SendMessage(e.Channel, str.ToString());
+            e.Channel.SendMessage(str.ToString());
         }
 
         private void Avatar(object s, MessageEventArgs e)
@@ -303,11 +302,11 @@ namespace StarkRavingMadBot
             var serverBaseURL = @"https://discordapp.com/api/";
             if (e.Message.MentionedUsers.Any())
             {
-                Client.SendMessage(e.Channel, serverBaseURL + e.Message.MentionedUsers.First().AvatarUrl);
+                e.Channel.SendMessage(serverBaseURL + e.Message.MentionedUsers.First().AvatarUrl);
             }
             else
             {
-                Client.SendMessage(e.Channel, serverBaseURL + e.User.AvatarUrl);
+                e.Channel.SendMessage(serverBaseURL + e.User.AvatarUrl);
             }
         }
 
@@ -332,7 +331,7 @@ namespace StarkRavingMadBot
                 }
                 hours = y ? hours * 24 : 48;
                 msg = $"```Members who have joined in the last {hours} hours ({hours/24} days):";
-                foreach (var m in e.Server.Members.Where(x => x.JoinedAt.CompareTo(DateTime.Now.AddHours(-hours)) >= 0).OrderBy(x => x.Name)) msg += $"\n - {m.Name}";
+                foreach (var m in e.Server.Users.Where(x => x.JoinedAt.CompareTo(DateTime.Now.AddHours(-hours)) >= 0).OrderBy(x => x.Name)) msg += $"\n - {m.Name}";
                 msg += "```";
             }
             else if (Command.GetParameters(e.Message.Text).ToLower().StartsWith("nonmem"))
@@ -355,12 +354,12 @@ namespace StarkRavingMadBot
                 {
                     hours *= 24;
                     msg = $"```Users without member tag active in the last {hours} hours ({hours/24} days):";
-                    foreach (var m in e.Server.Members.Where(x => !x.HasRole(r) && (x.LastActivityAt?.CompareTo(DateTime.Now.AddHours(-hours)) ?? -1) > 0).OrderBy(x => x.Name)) msg += $"\n - {m.Name}";
+                    foreach (var m in e.Server.Users.Where(x => !x.HasRole(r) && (x.LastActivityAt?.CompareTo(DateTime.Now.AddHours(-hours)) ?? -1) > 0).OrderBy(x => x.Name)) msg += $"\n - {m.Name}";
                 }
                 else
                 {
                     msg = $"```Users without member tag:";
-                    foreach (var m in e.Server.Members.Where(x => !x.HasRole(r)).OrderBy(x => x.Name)) msg += $"\n - {m.Name}";
+                    foreach (var m in e.Server.Users.Where(x => !x.HasRole(r)).OrderBy(x => x.Name)) msg += $"\n - {m.Name}";
                 }
                 msg += "```";
             }
@@ -385,12 +384,12 @@ namespace StarkRavingMadBot
 
                 msg = sb.ToString();
             }
-            Client.SendMessage(e.Channel, msg);
+            e.Channel.SendMessage(msg);
         }
 
         private void UD(object s, MessageEventArgs e)//Urban Dictionary
         {
-			Client.SendMessage(e.Channel, $"http://www.urbandictionary.com/define.php?term={Command.GetParameters(e.Message.RawText).Replace(' ', '+')}");
+			e.Channel.SendMessage($"http://www.urbandictionary.com/define.php?term={Command.GetParameters(e.Message.RawText).Replace(' ', '+')}");
         }
 
         private void Say(object s, MessageEventArgs e)
@@ -403,11 +402,11 @@ namespace StarkRavingMadBot
                     msg = "." + msg;
                 }
                 msg.Replace("@everyone", "@ everyone");
-                Client.SendMessage(e.Channel, msg);
+                e.Channel.SendMessage(msg);
             }
             else
             {
-                Client.SendMessage(e.Channel, "I have a free mind, and won't be told what to do.");
+                e.Channel.SendMessage("I have a free mind, and won't be told what to do.");
             }
         }
 
@@ -444,12 +443,12 @@ namespace StarkRavingMadBot
                 }
                 else
                 {
-                    Client.SendMessage(e.Channel, "Why don't you try entering that again. ಠ_ಠ");
+                    e.Channel.SendMessage("Why don't you try entering that again. ಠ_ಠ");
                     return;
                 }
             }
 
-            Client.SendMessage(e.Channel, $"Result is: {val}");
+            e.Channel.SendMessage($"Result is: {val}");
         }
 
         private void Reddit(object s, MessageEventArgs e)
@@ -460,7 +459,7 @@ namespace StarkRavingMadBot
 
             if (sub == null)
             {
-                Client.SendMessage(e.Channel, "Subreddit does not exist.");
+                e.Channel.SendMessage("Subreddit does not exist.");
                 return;
             }
 
@@ -469,7 +468,7 @@ namespace StarkRavingMadBot
             var sw = System.Diagnostics.Stopwatch.StartNew();
             if (!posts.Any())
             {
-                Client.SendMessage(e.Channel, "Subreddit has no posts.");
+                e.Channel.SendMessage("Subreddit has no posts.");
                 return;
             }
             Console.WriteLine($"sub-any took {sw.ElapsedMilliseconds}ms");
@@ -477,7 +476,7 @@ namespace StarkRavingMadBot
 
             if (posts.All(x => x.NSFW))//Safe to assume NSFW if 25 newest are NSFW. Not sure if reddit automatically marks posts NSFW in NSFW subs, so this could cause issues later....
             {
-                Client.SendMessage(e.Channel, "NSFW is not currently allowed");
+                e.Channel.SendMessage("NSFW is not currently allowed");
                 return;
             }
 
@@ -489,7 +488,7 @@ namespace StarkRavingMadBot
             var post = posts.Where(x => !x.NSFW).ElementAt(Rand.Next(NUM_POSTS));
             var msg = $"**{post.Title}**\n--\n{(post.IsSelfPost ? post.SelfText : post.Url.ToString())}";
             if (msg.Length > 2000) msg.Remove(1999);
-            Client.SendMessage(e.Channel, msg);
+            e.Channel.SendMessage(msg);
 
             Console.WriteLine($"sub-msg took {sw.ElapsedMilliseconds}ms");
             sw.Restart();
@@ -505,11 +504,11 @@ namespace StarkRavingMadBot
         {
             var str = new StringBuilder();
             str.AppendLine("Available commands:");
-			foreach (var c in GetCommands().Where(x => !x.Hidden && x.RequiredPermissions == ChannelPermissions.None).OrderBy(x => x.Name))
+			foreach (var c in GetCommands().Where(x => !x.Hidden && x.RequiredPermissions.Equals(ChannelPermissions.None)).OrderBy(x => x.Name))
             {
                 str.AppendLine($" - `{PREDICATE}{c.Name}`");
             }
-            Client.SendMessage(e.Channel, str.ToString());
+            e.Channel.SendMessage(str.ToString());
         }
 
         private void Info(object s, MessageEventArgs e)
@@ -519,12 +518,12 @@ namespace StarkRavingMadBot
 
         private void Test(object s, MessageEventArgs e)
         {
-            Client.SendMessage(e.Channel, $"I'm working <@{e.User.Id}>");
+            e.Channel.SendMessage($"I'm working <@{e.User.Id}>");
         }
 
         private void Git(object s, MessageEventArgs e)
         {
-            Client.SendMessage(e.Channel, "You can find my source at https://github.com/josh951623/StarkRavingMadBot/tree/master. If you'd like to suggest a feature, go ahead and join me in my dev server: https://discord.gg/0ktzcmJwmeWuQtiM.");
+            e.Channel.SendMessage("You can find my source at https://github.com/josh951623/StarkRavingMadBot/tree/master. If you'd like to suggest a feature, go ahead and join me in my dev server: https://discord.gg/0ktzcmJwmeWuQtiM.");
         }
 
         #endregion
@@ -546,13 +545,13 @@ namespace StarkRavingMadBot
                         lastOrder = e.Channel.Topic;
                         if (string.IsNullOrWhiteSpace(e.Channel.Topic))
                         {
-                            Client.EditChannel(e.Channel, e.Channel.Name, $"<@{person}>", e.Channel.Position);
+                            e.Channel.Edit(e.Channel.Name, $"<@{person}>", e.Channel.Position);
                         }
                         else
                         {
-                            Client.EditChannel(e.Channel, e.Channel.Name, $"{e.Channel.Topic} --> <@{person}>", e.Channel.Position);
+                            e.Channel.Edit(e.Channel.Name, $"{e.Channel.Topic} --> <@{person}>", e.Channel.Position);
                         }
-                        Client.SendMessage(e.Channel, $"Added '{Client.GetUser(e.Server, person).Name}' to game.");
+                        e.Channel.SendMessage($"Added '{e.Server.GetUser(person).Name}' to game.");
                     }
                 }
             }
@@ -569,8 +568,8 @@ namespace StarkRavingMadBot
                     if (UserInRole(e.User, e.Server, "staff") || person == e.User.Id)
                     {
                         lastOrder = e.Channel.Topic;
-                        Client.EditChannel(e.Channel, e.Channel.Name, e.Channel.Topic.Replace($" --> <@{person}>", "").Replace($"<@{person}> --> ", "").Replace($"<@{person}>", ""), e.Channel.Position);
-                        Client.SendMessage(e.Channel, $"Removed '{Client.GetUser(e.Server, person).Name}' from game.");
+                        e.Channel.Edit(e.Channel.Name, e.Channel.Topic.Replace($" --> <@{person}>", "").Replace($"<@{person}> --> ", "").Replace($"<@{person}>", ""), e.Channel.Position);
+                        e.Channel.SendMessage($"Removed '{e.Server.GetUser(person).Name}' from game.");
                     }
                 }
             }
@@ -583,7 +582,7 @@ namespace StarkRavingMadBot
             {
                 if (truthChannels.Contains(e.Channel.Name.ToLower()) && UserInRole(e.User, e.Server, "staff"))
                 {
-                    Client.EditChannel(e.Channel, e.Channel.Name, lastOrder, e.Channel.Position);
+                    e.Channel.Edit(e.Channel.Name, lastOrder, e.Channel.Position);
                 }
             }
             catch { }
@@ -595,7 +594,7 @@ namespace StarkRavingMadBot
             {
                 if (truthChannels.Contains(e.Channel.Name.ToLower()) && UserInRole(e.User, e.Server, "staff"))
                 {
-                    Client.EditChannel(e.Channel, e.Channel.Name, "", e.Channel.Position);
+                    e.Channel.Edit(e.Channel.Name, "", e.Channel.Position);
                 }
             }
             catch { }
